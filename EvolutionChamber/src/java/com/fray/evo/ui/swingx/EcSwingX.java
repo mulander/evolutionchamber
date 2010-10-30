@@ -18,6 +18,7 @@ import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultCellEditor;
@@ -436,9 +437,9 @@ public class EcSwingX extends JXPanel implements EcReportable
 		};
 		waypointTable = new JTable(waypointData, waypointHeaders);
 		waypointTable.setPreferredScrollableViewportSize(new Dimension(300,300));
+		waypointTable.setRowHeight(20);
 		JScrollPane waypointScroll = new JScrollPane(waypointTable);
 		waypointTable.setFillsViewportHeight(true);
-		
 		gridBagConstraints = new GridBagConstraints();
 		gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
 		gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
@@ -514,6 +515,7 @@ public class EcSwingX extends JXPanel implements EcReportable
 			}
 		});
 		targetTable.setPreferredScrollableViewportSize(new Dimension(300,300));
+		targetTable.setRowHeight(20);
 		
 		JScrollPane targetScroll = new JScrollPane(targetTable);
 		gridBagConstraints = new GridBagConstraints();
