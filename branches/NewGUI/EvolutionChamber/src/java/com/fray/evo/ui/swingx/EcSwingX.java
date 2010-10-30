@@ -42,6 +42,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.TableModel;
 
 import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
@@ -85,6 +88,8 @@ public class EcSwingX extends JXPanel implements EcReportable
 	private JButton				switchYabotButton;
 	private JTextArea			statsText;
 	private JTabbedPane			tabPane;
+	private JTable              waypointTable;
+	private JTable              targetTable;
 
 	public static void main(String[] args)
 	{
@@ -429,7 +434,7 @@ public class EcSwingX extends JXPanel implements EcReportable
 		String[][] waypointData = {
 				{"Final","02:00:00"}
 		};
-		JTable waypointTable = new JTable(waypointData, waypointHeaders);
+		waypointTable = new JTable(waypointData, waypointHeaders);
 		JScrollPane waypointScroll = new JScrollPane(waypointTable);
 		waypointTable.setFillsViewportHeight(true);
 
@@ -450,7 +455,7 @@ public class EcSwingX extends JXPanel implements EcReportable
 			   ,{"Structure","Lair", "1"}
 			   ,{"Upgrade","Metabolic boost",""}
 		};
-		JTable targetTable = new JTable(targetData, targetHeaders);
+		targetTable = new JTable(targetData, targetHeaders);
 		
 		JComboBox typeBox = new JComboBox(EcConstants.TYPES);
 		
@@ -459,6 +464,34 @@ public class EcSwingX extends JXPanel implements EcReportable
 		JComboBox nameBox = new JComboBox(EcConstants.UNITS);
 		
 		targetTable.getColumnModel().getColumn(1).setCellEditor(new DefaultCellEditor(nameBox));
+		
+		targetTable.getModel().addTableModelListener( new TableModelListener() {
+			
+			@Override
+			public void tableChanged(TableModelEvent e) {
+				// The Type column was changed. We need to update
+				// the list of targets in the Name column
+				if(e.getColumn() == 0)
+				{
+					TableModel model = (TableModel) e.getSource();
+					
+					String[] type = EcConstants.UNITS; // default to units
+					String newType = (String) model.getValueAt(e.getFirstRow(), e.getColumn());
+
+					if( newType.equals(EcConstants.UNIT) )
+					{
+						type = EcConstants.UNITS;
+					} else if ( newType.equals(EcConstants.UPGRADE) )
+					{
+						type = EcConstants.UPGRADES;
+					} else if ( newType.equals(EcConstants.STRUCTURE) )
+					{
+						type = EcConstants.STRUCTURES;
+					}
+					targetTable.getColumnModel().getColumn(1).setCellEditor( new DefaultCellEditor(new JComboBox(type) ) );
+				}
+			}
+		});
 		
 		JScrollPane targetScroll = new JScrollPane(targetTable);
 		gridBagConstraints = new GridBagConstraints();
