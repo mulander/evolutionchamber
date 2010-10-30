@@ -18,7 +18,6 @@ import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultCellEditor;
@@ -45,6 +44,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
 import org.jdesktop.swingx.JXLabel;
@@ -430,12 +430,15 @@ public class EcSwingX extends JXPanel implements EcReportable
 	private void addTableInputContainer(JPanel component)
 	{	
 		GridBagConstraints gridBagConstraints;
+		DefaultTableModel model;
 		
-		String[] waypointHeaders = {"Waypoint", "Deadline"};
-		String[][] waypointData = {
-				{"Final","02:00:00"}
-		};
-		waypointTable = new JTable(waypointData, waypointHeaders);
+		waypointTable = new JTable(new DefaultTableModel());
+		
+		model = (DefaultTableModel) waypointTable.getModel();
+		model.addColumn("Waypoint");
+		model.addColumn("Deadline");
+		model.addRow(new Object[] {"Final","02:00:00"} );
+		
 		waypointTable.setPreferredScrollableViewportSize(new Dimension(300,300));
 		waypointTable.setRowHeight(20);
 		JScrollPane waypointScroll = new JScrollPane(waypointTable);
@@ -454,8 +457,12 @@ public class EcSwingX extends JXPanel implements EcReportable
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				System.out.println("Pressed - waypoint");
+				int selectedRow = waypointTable.getSelectedRow();
+				if (selectedRow != -1 || selectedRow >= waypointTable.getModel().getRowCount())
+				{
+					DefaultTableModel model = (DefaultTableModel) waypointTable.getModel();
+					model.removeRow(selectedRow);
+				}
 			}
 		});
 		
@@ -463,21 +470,25 @@ public class EcSwingX extends JXPanel implements EcReportable
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				System.out.println("Pressed + waypoint");
+				DefaultTableModel model = (DefaultTableModel) waypointTable.getModel();
+				model.addRow(new Object[] {"Default","02:00:00"} );
 			}
 		});
 		
 		gridy++;
+
+		targetTable = new JTable(new DefaultTableModel());
 		
-		String[] targetHeaders = {"Type","Name","Quantity"};
-		String[][] targetData = {
-				{"Unit","Roach","5"}
-			   ,{"Unit","Queen", "3"}
-			   ,{"Structure","Lair", "1"}
-			   ,{"Upgrade","Metabolic boost",""}
-		};
-		targetTable = new JTable(targetData, targetHeaders);
+		
+		model = (DefaultTableModel) targetTable.getModel();
+		model.addColumn("Type");
+		model.addColumn("Name");
+		model.addColumn("Quantity");
+		
+		model.addRow( new Object[] {"Unit","Roach","5"});
+		model.addRow( new Object[] {"Unit","Queen", "3"});
+		model.addRow( new Object[] {"Structure","Lair", "1"});
+		model.addRow( new Object[] {"Upgrade","Metabolic boost",""});
 		
 		JComboBox typeBox = new JComboBox(EcConstants.TYPES);
 		
@@ -533,8 +544,13 @@ public class EcSwingX extends JXPanel implements EcReportable
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
 				System.out.println("Pressed - target");
+				int selectedRow = targetTable.getSelectedRow();
+				if (selectedRow != -1 || selectedRow >= targetTable.getModel().getRowCount())
+				{
+					DefaultTableModel model = (DefaultTableModel) targetTable.getModel();
+					model.removeRow(selectedRow);
+				}
 			}
 		});
 		
@@ -542,13 +558,13 @@ public class EcSwingX extends JXPanel implements EcReportable
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				System.out.println("Pressed + target");
+				DefaultTableModel model = (DefaultTableModel) targetTable.getModel();
+				model.addRow(new Object[] {EcConstants.UNIT,EcConstants.DRONES,"0"} );
 			}
 		});
 		
 	}
-	
+
 	private void addInputContainer(final int i, final JPanel component)
 	{
 		// addInput(component, "", new ActionListener()
