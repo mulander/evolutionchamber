@@ -48,6 +48,7 @@ import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXStatusBar;
 import org.jgap.InvalidConfigurationException;
 
+import com.fray.evo.EcConstants;
 import com.fray.evo.EcEvolver;
 import com.fray.evo.EcReportable;
 import com.fray.evo.EcSettings;
@@ -451,18 +452,11 @@ public class EcSwingX extends JXPanel implements EcReportable
 		};
 		JTable targetTable = new JTable(targetData, targetHeaders);
 		
-		JComboBox typeBox = new JComboBox();
-		typeBox.addItem("Unit");
-		typeBox.addItem("Upgrade");
-		typeBox.addItem("Structure");
+		JComboBox typeBox = new JComboBox(EcConstants.TYPES);
 		
 		targetTable.getColumnModel().getColumn(0).setCellEditor(new DefaultCellEditor(typeBox));
 		
-		JComboBox nameBox = new JComboBox();
-		nameBox.addItem("Drones");
-		nameBox.addItem("Zerglings");
-		nameBox.addItem("Queens");
-		nameBox.addItem("Roaches");
+		JComboBox nameBox = new JComboBox(EcConstants.UNITS);
 		
 		targetTable.getColumnModel().getColumn(1).setCellEditor(new DefaultCellEditor(nameBox));
 		
