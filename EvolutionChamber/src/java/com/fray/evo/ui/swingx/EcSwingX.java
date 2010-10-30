@@ -20,8 +20,10 @@ import java.util.Date;
 import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
+import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -448,6 +450,22 @@ public class EcSwingX extends JXPanel implements EcReportable
 			   ,{"Upgrade","Metabolic boost",""}
 		};
 		JTable targetTable = new JTable(targetData, targetHeaders);
+		
+		JComboBox typeBox = new JComboBox();
+		typeBox.addItem("Unit");
+		typeBox.addItem("Upgrade");
+		typeBox.addItem("Structure");
+		
+		targetTable.getColumnModel().getColumn(0).setCellEditor(new DefaultCellEditor(typeBox));
+		
+		JComboBox nameBox = new JComboBox();
+		nameBox.addItem("Drones");
+		nameBox.addItem("Zerglings");
+		nameBox.addItem("Queens");
+		nameBox.addItem("Roaches");
+		
+		targetTable.getColumnModel().getColumn(1).setCellEditor(new DefaultCellEditor(nameBox));
+		
 		JScrollPane targetScroll = new JScrollPane(targetTable);
 		gridBagConstraints = new GridBagConstraints();
 		gridBagConstraints.fill = GridBagConstraints.VERTICAL;
