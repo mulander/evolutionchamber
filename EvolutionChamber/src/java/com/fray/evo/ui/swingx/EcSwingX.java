@@ -33,6 +33,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
@@ -155,10 +156,13 @@ public class EcSwingX extends JXPanel implements EcReportable
 								tabPane.addTab("WP" + Integer.toString(i), lb);
 							addInputContainer(i, lb);
 						}
+						JPanel newGUI = new JPanel(new GridBagLayout());
+						addTableInputContainer(newGUI);
 						JPanel stats = new JPanel(new BorderLayout());
 						addStats(stats);
 						JPanel settings = new JPanel(new GridBagLayout());
 						addSettings(settings);
+						tabPane.addTab("newGUI", newGUI);
 						tabPane.addTab("Stats", stats);
 						tabPane.addTab("Settings", settings);
 						tabPane.setSelectedIndex(4);
@@ -414,6 +418,48 @@ public class EcSwingX extends JXPanel implements EcReportable
 		outputText.setText(sb.toString());
 	}
 
+	private void addTableInputContainer(JPanel component)
+	{	
+		GridBagConstraints gridBagConstraints;
+		
+		String[] waypointHeaders = {"Waypoint", "Deadline"};
+		String[][] waypointData = {
+				{"Final","02:00:00"}
+		};
+		JTable waypointTable = new JTable(waypointData, waypointHeaders);
+		JScrollPane waypointScroll = new JScrollPane(waypointTable);
+		waypointTable.setFillsViewportHeight(true);
+
+		gridBagConstraints = new GridBagConstraints();
+		gridBagConstraints.fill = GridBagConstraints.VERTICAL;
+		gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+		gridBagConstraints.gridy = gridy;
+		gridBagConstraints.gridwidth = 1;
+		gridBagConstraints.insets = new Insets(1, 1, 1, 1);
+
+		component.add(waypointScroll, gridBagConstraints);
+		gridy++;
+		
+		String[] targetHeaders = {"Type","Name","Quantity"};
+		String[][] targetData = {
+				{"Unit","Roach","5"}
+			   ,{"Unit","Queen", "3"}
+			   ,{"Structure","Lair", "1"}
+			   ,{"Upgrade","Metabolic boost",""}
+		};
+		JTable targetTable = new JTable(targetData, targetHeaders);
+		JScrollPane targetScroll = new JScrollPane(targetTable);
+		gridBagConstraints = new GridBagConstraints();
+		gridBagConstraints.fill = GridBagConstraints.VERTICAL;
+		gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+		gridBagConstraints.gridy = gridy;
+		gridBagConstraints.gridwidth = 1;
+		gridBagConstraints.insets = new Insets(1, 1, 1, 1);
+		
+		component.add(targetScroll, gridBagConstraints);
+		gridy++;
+	}
+	
 	private void addInputContainer(final int i, final JPanel component)
 	{
 		// addInput(component, "", new ActionListener()
