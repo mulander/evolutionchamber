@@ -435,17 +435,38 @@ public class EcSwingX extends JXPanel implements EcReportable
 				{"Final","02:00:00"}
 		};
 		waypointTable = new JTable(waypointData, waypointHeaders);
+		waypointTable.setPreferredScrollableViewportSize(new Dimension(300,300));
 		JScrollPane waypointScroll = new JScrollPane(waypointTable);
 		waypointTable.setFillsViewportHeight(true);
-
+		
 		gridBagConstraints = new GridBagConstraints();
-		gridBagConstraints.fill = GridBagConstraints.VERTICAL;
+		gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
 		gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
 		gridBagConstraints.gridy = gridy;
-		gridBagConstraints.gridwidth = 1;
+		gridBagConstraints.gridwidth = 2;
 		gridBagConstraints.insets = new Insets(1, 1, 1, 1);
 
 		component.add(waypointScroll, gridBagConstraints);
+		gridy++;
+		
+		addButton(component, "-",  new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				System.out.println("Pressed - waypoint");
+			}
+		});
+		
+		addButton(component, "+",  new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				System.out.println("Pressed + waypoint");
+			}
+		});
+		
 		gridy++;
 		
 		String[] targetHeaders = {"Type","Name","Quantity"};
@@ -466,7 +487,7 @@ public class EcSwingX extends JXPanel implements EcReportable
 		targetTable.getColumnModel().getColumn(1).setCellEditor(new DefaultCellEditor(nameBox));
 		
 		targetTable.getModel().addTableModelListener( new TableModelListener() {
-			
+			// TODO: BUG - The value list is not updated when the type changes on a different row than the next click on the name column.
 			@Override
 			public void tableChanged(TableModelEvent e) {
 				// The Type column was changed. We need to update
@@ -492,17 +513,38 @@ public class EcSwingX extends JXPanel implements EcReportable
 				}
 			}
 		});
+		targetTable.setPreferredScrollableViewportSize(new Dimension(300,300));
 		
 		JScrollPane targetScroll = new JScrollPane(targetTable);
 		gridBagConstraints = new GridBagConstraints();
-		gridBagConstraints.fill = GridBagConstraints.VERTICAL;
+		gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
 		gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
 		gridBagConstraints.gridy = gridy;
-		gridBagConstraints.gridwidth = 1;
+		gridBagConstraints.gridwidth = 2;
 		gridBagConstraints.insets = new Insets(1, 1, 1, 1);
 		
 		component.add(targetScroll, gridBagConstraints);
+		
 		gridy++;
+		
+		addButton(component, "-", new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				System.out.println("Pressed - target");
+			}
+		});
+		
+		addButton(component, "+", new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				System.out.println("Pressed + target");
+			}
+		});
+		
 	}
 	
 	private void addInputContainer(final int i, final JPanel component)
