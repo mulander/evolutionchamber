@@ -1,0 +1,18 @@
+#summary A resource for developers new to EvolutionChamber.
+#labels Phase-Requirements,Phase-Implementation,Featured
+
+= Introduction =
+
+This page will accelerate your development pace and enhance the quality of your work. In order to become a valuable contributor to the project and help StarCraft 2 gamers everywhere, it is important that you follow good development guidelines.
+
+= Development Guidelines = 
+
+Lomilar has laid out the following guidelines:
+
+  # If you do something different, place it in a different package. Provide, if you can, the option to use it or not. For instance, a redesign of the GUI should be placed in a separate package.
+  # Half-completed work in the trunk is acceptable, as long as it does not affect the way things currently work. There should be a clear and, preferably small, junction point to utilize the divergent code. Again, having separate packages helps to facilitate this.
+  # Learn and love refactoring. Never do the same thing twice, and if you do, think at least three times about it.
+
+= Helpful Tips for Starting Quick =
+
+The program is run from EcSwingX.java.
