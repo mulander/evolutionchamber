@@ -1,9 +1,25 @@
-#summary A resource for developers new to EvolutionChamber.
+#summary A resource for developers new to !EvolutionChamber.
 #labels Phase-Requirements,Phase-Implementation,Featured
+
+<wiki:toc max_depth="1" />
 
 = Introduction =
 
-This page will accelerate your development pace and enhance the quality of your work. In order to become a valuable contributor to the project and help StarCraft 2 gamers everywhere, it is important that you follow good development guidelines.
+This page will accelerate your development pace and enhance the quality of your work. In order to become a valuable contributor to the project and help !StarCraft 2 gamers everywhere, it is important that you follow good development guidelines.
+
+= Becoming a Committer =
+
+To request commit privileges, you must first have something useful to commit to the code.  This may take the form of functionality, improved efficiency, GUI design, or something else.  Check out the source code if you need an idea of where to look for possible improvements.  After you have an idea of what form your contribution will take, contact Lomilar through one of these channels:
+
+E-mail: fritley@gmail.com
+
+!TeamLiquid.net PM: Lomilar
+
+IRC: Lomilar in #!EvolutionChamber at irc.quakenet.org
+
+= Helpful Tips for Starting Quick =
+
+The program is run from EcSwingX.java.
 
 = Development Guidelines = 
 
@@ -12,7 +28,3 @@ Lomilar has laid out the following guidelines:
   # If you do something different, place it in a different package. Provide, if you can, the option to use it or not. For instance, a redesign of the GUI should be placed in a separate package.
   # Half-completed work in the trunk is acceptable, as long as it does not affect the way things currently work. There should be a clear and, preferably small, junction point to utilize the divergent code. Again, having separate packages helps to facilitate this.
   # Learn and love refactoring. Never do the same thing twice, and if you do, think at least three times about it.
-
-= Helpful Tips for Starting Quick =
-
-The program is run from EcSwingX.java.
