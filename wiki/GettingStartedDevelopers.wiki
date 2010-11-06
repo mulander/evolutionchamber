@@ -1,4 +1,4 @@
-#summary A resource for developers new to !EvolutionChamber.
+#summary A resource for developers new to EvolutionChamber.
 #labels Phase-Requirements,Phase-Implementation,Featured
 
 <wiki:toc max_depth="1" />
