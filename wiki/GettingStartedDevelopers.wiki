@@ -19,7 +19,7 @@ IRC: Lomilar in #!EvolutionChamber at irc.quakenet.org
 
 = Helpful Tips for Starting Quick =
 
-The program is run from EcSwingX.java.
+The program is run from EcSwingXMain.java.
 
 = Development Guidelines = 
 
