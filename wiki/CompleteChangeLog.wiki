@@ -6,9 +6,30 @@
 This page will detail the changes made at each version.
 
 
-= Details =
+= Change Logs by Release =
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+== v0020==
+
+  * Added drone scout timing to final way point.
+
+== v0017 ==
+
+  * Fixed bug where any build with waypoints was not being solved. 
+
+== v0016 ==
+
+  * Carapace upgrades now cost the correct amount.
+  * Auto updater now implemented. Will now ask if you want to go to a new version!
+  * Ability to switch drones on/off gas
+  * Drone movements to/from gas now have 2 second delay
+  * Fixed max larva bug, now is hatches times 19.
+  * Fixed max supply bug, now caps at 200.
+  * Implemented settings screen, to turn on/off extractor trick, and other things.
+  * Spore crawler now is a final destination.
+  * Can now have a waypoint without a final, and it will still calculate.
+  * Gas extractors now contribute to score.
+  * Now have simplified build format, with just supply/major buildings
+  * Slightly increased value of drones on satisfied builds.
+  * Gave mad props to some awesome contributors.
+  * Processors now limited to 4 times your computer's processor count. Overloading your processors can be good, because it spawns more strains, which has a higher chance of getting a more complete build over a long period of time.
+  * Evolution rate renamed to Mutation rate, more representative.
