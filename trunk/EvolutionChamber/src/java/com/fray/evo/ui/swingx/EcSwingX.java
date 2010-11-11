@@ -19,9 +19,11 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -77,7 +79,16 @@ public class EcSwingX extends JXPanel implements EcReportable
 	private List<JComponent>	inputControls	= new ArrayList<JComponent>();
 
 	EvolutionChamber			ec				= new EvolutionChamber();
-	EcState[]					destination;
+	List<EcState> destination = new ArrayList<EcState>();
+	
+	private JPanel historyPanel;
+	private List<JPanel> waypointPanels = new ArrayList<JPanel>();
+	private JPanel newWaypointPanel;
+	private JPanel statsPanel;
+	private JPanel settingsPanel;
+	
+	private boolean running = false;
+	
 	private JButton				goButton;
 	private JButton				stopButton;
 	private JButton				clipboardButton;
@@ -86,6 +97,7 @@ public class EcSwingX extends JXPanel implements EcReportable
 	private JButton				switchYabotButton;
 	private JTextArea			statsText;
 	private JTabbedPane			tabPane;
+	private Component			lastSelectedTab;
 	private JList				historyList;
 
 	public EcSwingX()
@@ -103,29 +115,88 @@ public class EcSwingX extends JXPanel implements EcReportable
 					addControlParts(leftbottom);
 					tabPane = new JTabbedPane(JTabbedPane.LEFT);
 					{
-						JPanel start = new JPanel(new BorderLayout());
-						addStart(start);
-						tabPane.addTab(messages.getString("tabs.history"), start);
+						//history tab
+						historyPanel = new JPanel(new BorderLayout());
+						addStart(historyPanel);
 
-						for (int i = 0; i < 5; i++)
+						//waypoint tabs
+						for (int i = 0; i < destination.size()-1; i++)
 						{
 							JPanel lb = new JPanel(new GridBagLayout());
-							if (i == 4)
-								tabPane.addTab(messages.getString("tabs.final"), lb);
-							else
-								tabPane.addTab(messages.getString("tabs.waypoint", i), lb);
-							addInputContainer(i, lb);
+							waypointPanels.add(lb);
+							addInputContainer(destination.get(i), lb);
 						}
+						
+						//new waypoint tab
+						newWaypointPanel = new JPanel(); //just make it an empty panel
+						tabPane.addChangeListener(new ChangeListener(){
+							@Override
+							public void stateChanged(ChangeEvent event) {
+								if (running && tabPane.getSelectedComponent() == newWaypointPanel){
+									tabPane.setSelectedComponent(lastSelectedTab);
+								} else {
+									lastSelectedTab = tabPane.getSelectedComponent();
+								}
+							}
+						});
+						tabPane.addMouseListener(new MouseListener(){
+							public void mouseClicked(MouseEvent event) {
+								if (!running && tabPane.getSelectedComponent() == newWaypointPanel){
+									//create a new waypoint
+									try{
+										//create waypoint object
+										EcState newWaypoint = (EcState) ec.getInternalDestination().clone();
+										if (destination.size() > 1){
+											//add 3 minutes to the last waypoint's time
+											newWaypoint.targetSeconds = destination.get(destination.size()-2).targetSeconds + (60*3);
+										} else {
+											newWaypoint.targetSeconds = 60*3;
+										}
+										destination.add(destination.size()-1, newWaypoint); //final dest stays on end
+										
+										//create panel
+										JPanel newWaypointPanel = new JPanel(new GridBagLayout());
+										waypointPanels.add(waypointPanels.size()-1, newWaypointPanel); //final dest panel stays on end
+										addInputContainer(newWaypoint, newWaypointPanel);
+										
+										//add the new waypoint to the tabs
+										refreshTabs();
+										
+										//select new waypoint
+										tabPane.setSelectedComponent(newWaypointPanel);
+									} catch (CloneNotSupportedException e){
+									}
+								}
+							}
+							
+							public void mouseEntered(MouseEvent arg0) {
+							}
+							public void mouseExited(MouseEvent arg0) {
+							}
+							public void mousePressed(MouseEvent arg0) {
+							}
+							public void mouseReleased(MouseEvent arg0) {
+							}
+						});
+						
+						//final waypoint tab
+						JPanel finalDestinationPanel = new JPanel(new GridBagLayout());
+						waypointPanels.add(finalDestinationPanel);
+						addInputContainer(destination.get(destination.size()-1), finalDestinationPanel);
 
-						JPanel stats = new JPanel(new BorderLayout());
-						addStats(stats);
-						tabPane.addTab(messages.getString("tabs.stats"), stats);
+						//stats tab
+						statsPanel = new JPanel(new BorderLayout());
+						addStats(statsPanel);
 
-						JPanel settings = new JPanel(new GridBagLayout());
-						addSettings(settings);
-						tabPane.addTab(messages.getString("tabs.settings"), settings);
+						//settings tab
+						settingsPanel = new JPanel(new GridBagLayout());
+						addSettings(settingsPanel);
+						
+						//add tabs to JTabbedPane
+						refreshTabs();
 
-						tabPane.setSelectedIndex(5);
+						//select final waypoint tab
+						tabPane.setSelectedComponent(waypointPanels.get(waypointPanels.size()-1));
 					}
 					GridBagConstraints gridBagConstraints = new GridBagConstraints();
 					gridBagConstraints.anchor = GridBagConstraints.WEST;
@@ -149,6 +220,20 @@ public class EcSwingX extends JXPanel implements EcReportable
 
 		add(outside);
 		outside.setDividerLocation(395);
+	}
+	
+	private void refreshTabs(){
+		tabPane.removeAll();
+		tabPane.addTab(messages.getString("tabs.history"), historyPanel);
+		for (int i = 0; i < waypointPanels.size()-1; i++)
+		{
+			JPanel p = waypointPanels.get(i);
+			tabPane.addTab(messages.getString("tabs.waypoint", i), p);
+		}
+		tabPane.addTab(messages.getString("tabs.waypoint", "+"), newWaypointPanel);
+		tabPane.addTab(messages.getString("tabs.final"), waypointPanels.get(waypointPanels.size()-1));
+		tabPane.addTab(messages.getString("tabs.stats"), statsPanel);
+		tabPane.addTab(messages.getString("tabs.settings"), settingsPanel);
 	}
 
 	private void addStart(JPanel start)
@@ -195,6 +280,7 @@ public class EcSwingX extends JXPanel implements EcReportable
 			public void actionPerformed(ActionEvent e)
 			{
 				expandWaypoints((EcState) historyList.getSelectedValue());
+				refreshTabs();
 				readDestinations();
 			}
 		});
@@ -287,11 +373,11 @@ public class EcSwingX extends JXPanel implements EcReportable
 			// it works :)
 			final String[] radioButtonCaptions = {messages.getString("settings.workerParity.none"), messages.getString("settings.workerParity.untilSaturation"), messages.getString("settings.workerParity.allowOverdroning")};
 			final int defaultSelected;
-			if (destination[destination.length - 1].settings.overDrone)
+			if (destination.get(destination.size()-1).settings.overDrone)
 			{
 				defaultSelected = 1;
 			}
-			else if (destination[destination.length - 1].settings.workerParity)
+			else if (destination.get(destination.size()-1).settings.workerParity)
 			{
 				defaultSelected = 2;
 			}
@@ -306,18 +392,18 @@ public class EcSwingX extends JXPanel implements EcReportable
 						{
 							if (getSelected(e).equals(radioButtonCaptions[1]))
 							{
-								destination[destination.length - 1].settings.workerParity = true;
-								destination[destination.length - 1].settings.overDrone = false;
+								destination.get(destination.size()-1).settings.workerParity = true;
+								destination.get(destination.size()-1).settings.overDrone = false;
 							}
 							else if (getSelected(e).equals(radioButtonCaptions[2]))
 							{
-								destination[destination.length - 1].settings.workerParity = false;
-								destination[destination.length - 1].settings.overDrone = true;
+								destination.get(destination.size()-1).settings.workerParity = false;
+								destination.get(destination.size()-1).settings.overDrone = true;
 							}
 							else
 							{
-								destination[destination.length - 1].settings.workerParity = false;
-								destination[destination.length - 1].settings.overDrone = false;
+								destination.get(destination.size()-1).settings.workerParity = false;
+								destination.get(destination.size()-1).settings.overDrone = false;
 							}
 						}
 
@@ -333,57 +419,57 @@ public class EcSwingX extends JXPanel implements EcReportable
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[destination.length - 1].settings.useExtractorTrick = getTrue(e);
+				destination.get(destination.size()-1).settings.useExtractorTrick = getTrue(e);
 			}
 
 			@Override
 			void reverse(Object o)
 			{
 				JCheckBox c = (JCheckBox) o;
-				c.setSelected(destination[destination.length - 1].settings.useExtractorTrick);
+				c.setSelected(destination.get(destination.size()-1).settings.useExtractorTrick);
 			}
-		}).setSelected(destination[destination.length - 1].settings.useExtractorTrick);
+		}).setSelected(destination.get(destination.size()-1).settings.useExtractorTrick);
 		gridy++;
 		addCheck(settings, messages.getString("settings.pullWorkersFromGas"), new CustomActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[destination.length - 1].settings.pullWorkersFromGas = getTrue(e);
+				destination.get(destination.size()-1).settings.pullWorkersFromGas = getTrue(e);
 			}
 			@Override
 			void reverse(Object o)
 			{
 				JCheckBox c = (JCheckBox) o;
-				c.setSelected(destination[destination.length - 1].settings.pullWorkersFromGas);
+				c.setSelected(destination.get(destination.size()-1).settings.pullWorkersFromGas);
 			}
-		}).setSelected(destination[destination.length - 1].settings.useExtractorTrick);
+		}).setSelected(destination.get(destination.size()-1).settings.useExtractorTrick);
 		gridy++;
 		addCheck(settings, messages.getString("settings.pullThreeWorkersTogether"), new CustomActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[destination.length - 1].settings.pullThreeWorkersOnly = getTrue(e);
+				destination.get(destination.size()-1).settings.pullThreeWorkersOnly = getTrue(e);
 			}
 			@Override
 			void reverse(Object o)
 			{
 				JCheckBox c = (JCheckBox) o;
-				c.setSelected(destination[destination.length - 1].settings.pullThreeWorkersOnly);
+				c.setSelected(destination.get(destination.size()-1).settings.pullThreeWorkersOnly);
 			}
-		}).setSelected(destination[destination.length - 1].settings.pullThreeWorkersOnly);
+		}).setSelected(destination.get(destination.size()-1).settings.pullThreeWorkersOnly);
 		gridy++;
 		addInput(settings, messages.getString("settings.minPoolSupply"), new CustomActionListener()
 		{
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[destination.length - 1].settings.minimumPoolSupply = getDigit(e);
+				destination.get(destination.size()-1).settings.minimumPoolSupply = getDigit(e);
 			}
 			@Override
 			void reverse(Object o)
 			{
 				JTextField c = (JTextField) o;
-				c.setText(Integer.toString(destination[destination.length - 1].settings.minimumPoolSupply));
+				c.setText(Integer.toString(destination.get(destination.size()-1).settings.minimumPoolSupply));
 			}
 		}).setText("2");
 		gridy++;
@@ -392,13 +478,13 @@ public class EcSwingX extends JXPanel implements EcReportable
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[destination.length - 1].settings.minimumExtractorSupply = getDigit(e);
+				destination.get(destination.size()-1).settings.minimumExtractorSupply = getDigit(e);
 			}
 			@Override
 			void reverse(Object o)
 			{
 				JTextField c = (JTextField) o;
-				c.setText(Integer.toString(destination[destination.length - 1].settings.minimumExtractorSupply));
+				c.setText(Integer.toString(destination.get(destination.size()-1).settings.minimumExtractorSupply));
 			}
 		}).setText("2");
 		gridy++;
@@ -407,14 +493,14 @@ public class EcSwingX extends JXPanel implements EcReportable
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[destination.length - 1].settings.minimumHatcherySupply = getDigit(e);
+				destination.get(destination.size()-1).settings.minimumHatcherySupply = getDigit(e);
 
 			}
 			@Override
 			void reverse(Object o)
 			{
 				JTextField c = (JTextField) o;
-				c.setText(Integer.toString(destination[destination.length - 1].settings.minimumHatcherySupply));
+				c.setText(Integer.toString(destination.get(destination.size()-1).settings.minimumHatcherySupply));
 			}
 		}).setText("2");
 	}
@@ -423,16 +509,12 @@ public class EcSwingX extends JXPanel implements EcReportable
 	{
 		try
 		{
-			destination = new EcState[5];
-			destination[0] = (EcState) ec.getInternalDestination().clone();
-			destination[0].targetSeconds = 3 * 60;
-			destination[1] = (EcState) ec.getInternalDestination().clone();
-			destination[1].targetSeconds = 6 * 60;
-			destination[2] = (EcState) ec.getInternalDestination().clone();
-			destination[2].targetSeconds = 9 * 60;
-			destination[3] = (EcState) ec.getInternalDestination().clone();
-			destination[3].targetSeconds = 12 * 60;
-			destination[4] = (EcState) ec.getInternalDestination().clone();
+			for (int i = 1; i < 5; i++){ //add 4 waypoints
+				EcState state = (EcState) ec.getInternalDestination().clone();
+				state.targetSeconds = (i*3) * 60;
+				destination.add(state);
+			}
+			destination.add((EcState) ec.getInternalDestination().clone()); //final destination
 		}
 		catch (CloneNotSupportedException e)
 		{
@@ -531,7 +613,7 @@ public class EcSwingX extends JXPanel implements EcReportable
 		outputText.setText(welcome);
 	}
 
-	private void addInputContainer(final int i, final JPanel components)
+	private void addInputContainer(final EcState dest, final JPanel components)
 	{
 		// addInput(component, "", new ActionListener()
 		// {
@@ -551,71 +633,71 @@ public class EcSwingX extends JXPanel implements EcReportable
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].drones = getDigit(e);
+				dest.drones = getDigit(e);
 			}
 
 			@Override
 			void reverse(Object o)
 			{
 				JTextField c = (JTextField) o;
-				c.setText(Integer.toString(destination[i].drones));
+				c.setText(Integer.toString(dest.drones));
 			}
 		});
 		addInput(components, messages.getString("waypoint.deadline"), new CustomActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].targetSeconds = getDigit(e);
+				dest.targetSeconds = getDigit(e);
 				((JTextField)e.getSource()).setText(
-						Integer.toString(destination[i].targetSeconds / 60) + ":"
-								+ Integer.toString(destination[i].targetSeconds % 60));
+						Integer.toString(dest.targetSeconds / 60) + ":"
+								+ Integer.toString(dest.targetSeconds % 60));
 			}
 			void reverse(Object o)
 			{
 				JTextField c = (JTextField) o;
-				c.setText(Integer.toString(destination[i].targetSeconds));
+				c.setText(Integer.toString(dest.targetSeconds));
 			}
 		}).setText(
-				Integer.toString(destination[i].targetSeconds / 60) + ":"
-						+ Integer.toString(destination[i].targetSeconds % 60));
+				Integer.toString(dest.targetSeconds / 60) + ":"
+						+ Integer.toString(dest.targetSeconds % 60));
 		gridy++;
 		addInput(components, messages.getString("waypoint.overlords"), new CustomActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].overlords = getDigit(e);
+				dest.overlords = getDigit(e);
 			}
 			void reverse(Object o)
 			{
 				JTextField c = (JTextField) o;
-				c.setText(Integer.toString(destination[i].overlords));
+				c.setText(Integer.toString(dest.overlords));
 			}
 		});
 		addInput(components, messages.getString("waypoint.overseers"), new CustomActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].overseers = getDigit(e);
+				dest.overseers = getDigit(e);
 			}
 			void reverse(Object o)
 			{
 				JTextField c = (JTextField) o;
-				c.setText(Integer.toString(destination[i].overseers));
+				c.setText(Integer.toString(dest.overseers));
 			}
 		});
 		gridy++;
-		if (i == 4) // only put this option on the Final waypoint.
+		if (dest == destination.get(destination.size()-1)) // only put this option on the Final waypoint.
 		{
 			addInput(components, messages.getString("waypoint.scoutTiming"), new CustomActionListener()
 			{
 				public void actionPerformed(ActionEvent e)
 				{
-					destination[destination.length-1].scoutDrone = getDigit(e);
+					destination.get(destination.size()-1).scoutDrone = getDigit(e);
 				}
 				void reverse(Object o)
 				{
 					JTextField c = (JTextField) o;
-					c.setText(Integer.toString(destination[destination.length-1].scoutDrone));
+					c.setText(Integer.toString(destination.get(destination.size()-1).scoutDrone));
 				}
 			});
 		}
@@ -623,12 +705,12 @@ public class EcSwingX extends JXPanel implements EcReportable
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].burrow = getTrue(e);
+				dest.burrow = getTrue(e);
 			}
 			void reverse(Object o)
 			{
 				JCheckBox c = (JCheckBox) o;
-				c.setSelected(destination[i].burrow);
+				c.setSelected(dest.burrow);
 			}
 		});
 		gridy++;
@@ -636,24 +718,24 @@ public class EcSwingX extends JXPanel implements EcReportable
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].queens = getDigit(e);
+				dest.queens = getDigit(e);
 			}
 			void reverse(Object o)
 			{
 				JTextField c = (JTextField) o;
-				c.setText(Integer.toString(destination[i].queens));
+				c.setText(Integer.toString(dest.queens));
 			}
 		});
 		addCheck(components, messages.getString("waypoint.pneumatizedCarapace"), new CustomActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].pneumatizedCarapace = getTrue(e);
+				dest.pneumatizedCarapace = getTrue(e);
 			}
 			void reverse(Object o)
 			{
 				JCheckBox c = (JCheckBox) o;
-				c.setSelected(destination[i].pneumatizedCarapace);
+				c.setSelected(dest.pneumatizedCarapace);
 			}
 		});
 		gridy++;
@@ -661,24 +743,24 @@ public class EcSwingX extends JXPanel implements EcReportable
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].zerglings = getDigit(e);
+				dest.zerglings = getDigit(e);
 			}
 			void reverse(Object o)
 			{
 				JTextField c = (JTextField) o;
-				c.setText(Integer.toString(destination[i].zerglings));
+				c.setText(Integer.toString(dest.zerglings));
 			}
 		});
 		addCheck(components, messages.getString("waypoint.ventralSacs"), new CustomActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].ventralSacs = getTrue(e);
+				dest.ventralSacs = getTrue(e);
 			}
 			void reverse(Object o)
 			{
 				JCheckBox c = (JCheckBox) o;
-				c.setSelected(destination[i].ventralSacs);
+				c.setSelected(dest.ventralSacs);
 			}
 		});
 		gridy++;
@@ -686,24 +768,24 @@ public class EcSwingX extends JXPanel implements EcReportable
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].metabolicBoost = getTrue(e);
+				dest.metabolicBoost = getTrue(e);
 			}
 			void reverse(Object o)
 			{
 				JCheckBox c = (JCheckBox) o;
-				c.setSelected(destination[i].metabolicBoost);
+				c.setSelected(dest.metabolicBoost);
 			}
 		});
 		addCheck(components, messages.getString("waypoint.adrenalGlands"), new CustomActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].adrenalGlands = getTrue(e);
+				dest.adrenalGlands = getTrue(e);
 			}
 			void reverse(Object o)
 			{
 				JCheckBox c = (JCheckBox) o;
-				c.setSelected(destination[i].adrenalGlands);
+				c.setSelected(dest.adrenalGlands);
 			}
 		});
 		gridy++;
@@ -711,24 +793,24 @@ public class EcSwingX extends JXPanel implements EcReportable
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].banelings = getDigit(e);
+				dest.banelings = getDigit(e);
 			}
 			void reverse(Object o)
 			{
 				JTextField c = (JTextField) o;
-				c.setText(Integer.toString(destination[i].banelings));
+				c.setText(Integer.toString(dest.banelings));
 			}
 		});
 		addCheck(components, messages.getString("waypoint.centrifugalHooks"), new CustomActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].centrifugalHooks = getTrue(e);
+				dest.centrifugalHooks = getTrue(e);
 			}
 			void reverse(Object o)
 			{
 				JCheckBox c = (JCheckBox) o;
-				c.setSelected(destination[i].centrifugalHooks);
+				c.setSelected(dest.centrifugalHooks);
 			}
 		});
 		gridy++;
@@ -736,13 +818,13 @@ public class EcSwingX extends JXPanel implements EcReportable
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].roaches = getDigit(e);
+				dest.roaches = getDigit(e);
 
 			}
 			void reverse(Object o)
 			{
 				JTextField c = (JTextField) o;
-				c.setText(Integer.toString(destination[i].roaches));
+				c.setText(Integer.toString(dest.roaches));
 			}
 		});
 		gridy++;
@@ -750,24 +832,24 @@ public class EcSwingX extends JXPanel implements EcReportable
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].glialReconstitution = getTrue(e);
+				dest.glialReconstitution = getTrue(e);
 			}
 			void reverse(Object o)
 			{
 				JCheckBox c = (JCheckBox) o;
-				c.setSelected(destination[i].glialReconstitution);
+				c.setSelected(dest.glialReconstitution);
 			}
 		});
 		addCheck(components, messages.getString("waypoint.tunnelingClaws"), new CustomActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].tunnelingClaws = getTrue(e);
+				dest.tunnelingClaws = getTrue(e);
 			}
 			void reverse(Object o)
 			{
 				JCheckBox c = (JCheckBox) o;
-				c.setSelected(destination[i].tunnelingClaws);
+				c.setSelected(dest.tunnelingClaws);
 			}
 		});
 		gridy++;
@@ -775,24 +857,24 @@ public class EcSwingX extends JXPanel implements EcReportable
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].hydralisks = getDigit(e);
+				dest.hydralisks = getDigit(e);
 			}
 			void reverse(Object o)
 			{
 				JTextField c = (JTextField) o;
-				c.setText(Integer.toString(destination[i].hydralisks));
+				c.setText(Integer.toString(dest.hydralisks));
 			}
 		});
 		addCheck(components, messages.getString("waypoint.groovedSpines"), new CustomActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].groovedSpines = getTrue(e);
+				dest.groovedSpines = getTrue(e);
 			}
 			void reverse(Object o)
 			{
 				JCheckBox c = (JCheckBox) o;
-				c.setSelected(destination[i].groovedSpines);
+				c.setSelected(dest.groovedSpines);
 			}
 		});
 		gridy++;
@@ -800,12 +882,12 @@ public class EcSwingX extends JXPanel implements EcReportable
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].infestors = getDigit(e);
+				dest.infestors = getDigit(e);
 			}
 			void reverse(Object o)
 			{
 				JTextField c = (JTextField) o;
-				c.setText(Integer.toString(destination[i].infestors));
+				c.setText(Integer.toString(dest.infestors));
 			}
 		});
 		gridy++;
@@ -813,24 +895,24 @@ public class EcSwingX extends JXPanel implements EcReportable
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].neuralParasite = getTrue(e);
+				dest.neuralParasite = getTrue(e);
 			}
 			void reverse(Object o)
 			{
 				JCheckBox c = (JCheckBox) o;
-				c.setSelected(destination[i].neuralParasite);
+				c.setSelected(dest.neuralParasite);
 			}
 		});
 		addCheck(components, messages.getString("waypoint.pathogenGlands"), new CustomActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].pathogenGlands = getTrue(e);
+				dest.pathogenGlands = getTrue(e);
 			}
 			void reverse(Object o)
 			{
 				JCheckBox c = (JCheckBox) o;
-				c.setSelected(destination[i].pathogenGlands);
+				c.setSelected(dest.pathogenGlands);
 			}
 		});
 		gridy++;
@@ -838,12 +920,12 @@ public class EcSwingX extends JXPanel implements EcReportable
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].mutalisks = getDigit(e);
+				dest.mutalisks = getDigit(e);
 			}
 			void reverse(Object o)
 			{
 				JTextField c = (JTextField) o;
-				c.setText(Integer.toString(destination[i].mutalisks));
+				c.setText(Integer.toString(dest.mutalisks));
 			}
 		});
 		gridy++;
@@ -851,24 +933,24 @@ public class EcSwingX extends JXPanel implements EcReportable
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].ultralisks = getDigit(e);
+				dest.ultralisks = getDigit(e);
 			}
 			void reverse(Object o)
 			{
 				JTextField c = (JTextField) o;
-				c.setText(Integer.toString(destination[i].ultralisks));
+				c.setText(Integer.toString(dest.ultralisks));
 			}
 		});
 		addCheck(components, messages.getString("waypoint.chitinousPlating"), new CustomActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].chitinousPlating = getTrue(e);
+				dest.chitinousPlating = getTrue(e);
 			}
 			void reverse(Object o)
 			{
 				JCheckBox c = (JCheckBox) o;
-				c.setSelected(destination[i].chitinousPlating);
+				c.setSelected(dest.chitinousPlating);
 			}
 		});
 		gridy++;
@@ -876,24 +958,24 @@ public class EcSwingX extends JXPanel implements EcReportable
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].corruptors = getDigit(e);
+				dest.corruptors = getDigit(e);
 			}
 			void reverse(Object o)
 			{
 				JTextField c = (JTextField) o;
-				c.setText(Integer.toString(destination[i].corruptors));
+				c.setText(Integer.toString(dest.corruptors));
 			}
 		});
 		addInput(components, messages.getString("waypoint.broodlords"), new CustomActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].broodlords = getDigit(e);
+				dest.broodlords = getDigit(e);
 			}
 			void reverse(Object o)
 			{
 				JTextField c = (JTextField) o;
-				c.setText(Integer.toString(destination[i].broodlords));
+				c.setText(Integer.toString(dest.broodlords));
 			}
 		});
 		gridy++;
@@ -901,36 +983,36 @@ public class EcSwingX extends JXPanel implements EcReportable
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].melee1 = getTrue(e);
+				dest.melee1 = getTrue(e);
 			}
 			void reverse(Object o)
 			{
 				JCheckBox c = (JCheckBox) o;
-				c.setSelected(destination[i].melee1);
+				c.setSelected(dest.melee1);
 			}
 		});
 		addCheck(components, "+2", new CustomActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].melee2 = getTrue(e);
+				dest.melee2 = getTrue(e);
 			}
 			void reverse(Object o)
 			{
 				JCheckBox c = (JCheckBox) o;
-				c.setSelected(destination[i].melee2);
+				c.setSelected(dest.melee2);
 			}
 		});
 		addCheck(components, "+3", new CustomActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].melee3 = getTrue(e);
+				dest.melee3 = getTrue(e);
 			}
 			void reverse(Object o)
 			{
 				JCheckBox c = (JCheckBox) o;
-				c.setSelected(destination[i].melee3);
+				c.setSelected(dest.melee3);
 			}
 		});
 		gridy++;
@@ -938,36 +1020,36 @@ public class EcSwingX extends JXPanel implements EcReportable
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].missile1 = getTrue(e);
+				dest.missile1 = getTrue(e);
 			}
 			void reverse(Object o)
 			{
 				JCheckBox c = (JCheckBox) o;
-				c.setSelected(destination[i].missile1);
+				c.setSelected(dest.missile1);
 			}
 		});
 		addCheck(components, "+2", new CustomActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].missile2 = getTrue(e);
+				dest.missile2 = getTrue(e);
 			}
 			void reverse(Object o)
 			{
 				JCheckBox c = (JCheckBox) o;
-				c.setSelected(destination[i].missile2);
+				c.setSelected(dest.missile2);
 			}
 		});
 		addCheck(components, "+3", new CustomActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].missile3 = getTrue(e);
+				dest.missile3 = getTrue(e);
 			}
 			void reverse(Object o)
 			{
 				JCheckBox c = (JCheckBox) o;
-				c.setSelected(destination[i].missile3);
+				c.setSelected(dest.missile3);
 			}
 		});
 		gridy++;
@@ -975,36 +1057,36 @@ public class EcSwingX extends JXPanel implements EcReportable
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].armor1 = getTrue(e);
+				dest.armor1 = getTrue(e);
 			}
 			void reverse(Object o)
 			{
 				JCheckBox c = (JCheckBox) o;
-				c.setSelected(destination[i].armor1);
+				c.setSelected(dest.armor1);
 			}
 		});
 		addCheck(components, "+2", new CustomActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].armor2 = getTrue(e);
+				dest.armor2 = getTrue(e);
 			}
 			void reverse(Object o)
 			{
 				JCheckBox c = (JCheckBox) o;
-				c.setSelected(destination[i].armor2);
+				c.setSelected(dest.armor2);
 			}
 		});
 		addCheck(components, "+3", new CustomActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].armor3 = getTrue(e);
+				dest.armor3 = getTrue(e);
 			}
 			void reverse(Object o)
 			{
 				JCheckBox c = (JCheckBox) o;
-				c.setSelected(destination[i].armor3);
+				c.setSelected(dest.armor3);
 			}
 		});
 		gridy++;
@@ -1012,36 +1094,36 @@ public class EcSwingX extends JXPanel implements EcReportable
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].flyerAttack1 = getTrue(e);
+				dest.flyerAttack1 = getTrue(e);
 			}
 			void reverse(Object o)
 			{
 				JCheckBox c = (JCheckBox) o;
-				c.setSelected(destination[i].flyerAttack1);
+				c.setSelected(dest.flyerAttack1);
 			}
 		});
 		addCheck(components, "+2", new CustomActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].flyerAttack2 = getTrue(e);
+				dest.flyerAttack2 = getTrue(e);
 			}
 			void reverse(Object o)
 			{
 				JCheckBox c = (JCheckBox) o;
-				c.setSelected(destination[i].flyerAttack2);
+				c.setSelected(dest.flyerAttack2);
 			}
 		});
 		addCheck(components, "+3", new CustomActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].flyerAttack3 = getTrue(e);
+				dest.flyerAttack3 = getTrue(e);
 			}
 			void reverse(Object o)
 			{
 				JCheckBox c = (JCheckBox) o;
-				c.setSelected(destination[i].flyerAttack3);
+				c.setSelected(dest.flyerAttack3);
 			}
 		});
 		gridy++;
@@ -1049,36 +1131,36 @@ public class EcSwingX extends JXPanel implements EcReportable
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].flyerArmor1 = getTrue(e);
+				dest.flyerArmor1 = getTrue(e);
 			}
 			void reverse(Object o)
 			{
 				JCheckBox c = (JCheckBox) o;
-				c.setSelected(destination[i].flyerArmor1);
+				c.setSelected(dest.flyerArmor1);
 			}
 		});
 		addCheck(components, "+2", new CustomActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].flyerArmor2 = getTrue(e);
+				dest.flyerArmor2 = getTrue(e);
 			}
 			void reverse(Object o)
 			{
 				JCheckBox c = (JCheckBox) o;
-				c.setSelected(destination[i].flyerArmor2);
+				c.setSelected(dest.flyerArmor2);
 			}
 		});
 		addCheck(components, "+3", new CustomActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].flyerArmor3 = getTrue(e);
+				dest.flyerArmor3 = getTrue(e);
 			}
 			void reverse(Object o)
 			{
 				JCheckBox c = (JCheckBox) o;
-				c.setSelected(destination[i].flyerArmor3);
+				c.setSelected(dest.flyerArmor3);
 			}
 		});
 		gridy++;
@@ -1086,24 +1168,24 @@ public class EcSwingX extends JXPanel implements EcReportable
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].requiredBases = getDigit(e);
+				dest.requiredBases = getDigit(e);
 			}
 			void reverse(Object o)
 			{
 				JTextField c = (JTextField) o;
-				c.setText(Integer.toString(destination[i].requiredBases));
+				c.setText(Integer.toString(dest.requiredBases));
 			}
 		});
 		addInput(components, messages.getString("waypoint.lairs"), new CustomActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].lairs = getDigit(e);
+				dest.lairs = getDigit(e);
 			}
 			void reverse(Object o)
 			{
 				JTextField c = (JTextField) o;
-				c.setText(Integer.toString(destination[i].lairs));
+				c.setText(Integer.toString(dest.lairs));
 			}
 		});
 		gridy++;
@@ -1111,24 +1193,24 @@ public class EcSwingX extends JXPanel implements EcReportable
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].hives = getDigit(e);
+				dest.hives = getDigit(e);
 			}
 			void reverse(Object o)
 			{
 				JTextField c = (JTextField) o;
-				c.setText(Integer.toString(destination[i].hives));
+				c.setText(Integer.toString(dest.hives));
 			}
 		});
 		addInput(components, messages.getString("waypoint.gasExtractors"), new CustomActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].gasExtractors = getDigit(e);
+				dest.gasExtractors = getDigit(e);
 			}
 			void reverse(Object o)
 			{
 				JTextField c = (JTextField) o;
-				c.setText(Integer.toString(destination[i].gasExtractors));
+				c.setText(Integer.toString(dest.gasExtractors));
 			}
 		});
 		gridy++;
@@ -1136,12 +1218,12 @@ public class EcSwingX extends JXPanel implements EcReportable
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].evolutionChambers = getDigit(e);
+				dest.evolutionChambers = getDigit(e);
 			}
 			void reverse(Object o)
 			{
 				JTextField c = (JTextField) o;
-				c.setText(Integer.toString(destination[i].evolutionChambers));
+				c.setText(Integer.toString(dest.evolutionChambers));
 			}
 		});
 		gridy++;
@@ -1149,24 +1231,24 @@ public class EcSwingX extends JXPanel implements EcReportable
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].spineCrawlers = getDigit(e);
+				dest.spineCrawlers = getDigit(e);
 			}
 			void reverse(Object o)
 			{
 				JTextField c = (JTextField) o;
-				c.setText(Integer.toString(destination[i].spineCrawlers));
+				c.setText(Integer.toString(dest.spineCrawlers));
 			}
 		});
 		addInput(components, messages.getString("waypoint.sporeCrawlers"), new CustomActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].sporeCrawlers = getDigit(e);
+				dest.sporeCrawlers = getDigit(e);
 			}
 			void reverse(Object o)
 			{
 				JTextField c = (JTextField) o;
-				c.setText(Integer.toString(destination[i].sporeCrawlers));
+				c.setText(Integer.toString(dest.sporeCrawlers));
 			}
 		});
 		gridy++;
@@ -1174,24 +1256,24 @@ public class EcSwingX extends JXPanel implements EcReportable
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].spawningPools = getDigit(e);
+				dest.spawningPools = getDigit(e);
 			}
 			void reverse(Object o)
 			{
 				JTextField c = (JTextField) o;
-				c.setText(Integer.toString(destination[i].spawningPools));
+				c.setText(Integer.toString(dest.spawningPools));
 			}
 		});
 		addInput(components, messages.getString("waypoint.banelingNests"), new CustomActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].banelingNest = getDigit(e);
+				dest.banelingNest = getDigit(e);
 			}
 			void reverse(Object o)
 			{
 				JTextField c = (JTextField) o;
-				c.setText(Integer.toString(destination[i].banelingNest));
+				c.setText(Integer.toString(dest.banelingNest));
 			}
 		});
 		gridy++;
@@ -1199,24 +1281,24 @@ public class EcSwingX extends JXPanel implements EcReportable
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].roachWarrens = getDigit(e);
+				dest.roachWarrens = getDigit(e);
 			}
 			void reverse(Object o)
 			{
 				JTextField c = (JTextField) o;
-				c.setText(Integer.toString(destination[i].roachWarrens));
+				c.setText(Integer.toString(dest.roachWarrens));
 			}
 		});
 		addInput(components, messages.getString("waypoint.hydraliskDens"), new CustomActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].hydraliskDen = getDigit(e);
+				dest.hydraliskDen = getDigit(e);
 			}
 			void reverse(Object o)
 			{
 				JTextField c = (JTextField) o;
-				c.setText(Integer.toString(destination[i].hydraliskDen));
+				c.setText(Integer.toString(dest.hydraliskDen));
 			}
 		});
 		gridy++;
@@ -1224,24 +1306,24 @@ public class EcSwingX extends JXPanel implements EcReportable
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].infestationPit = getDigit(e);
+				dest.infestationPit = getDigit(e);
 			}
 			void reverse(Object o)
 			{
 				JTextField c = (JTextField) o;
-				c.setText(Integer.toString(destination[i].infestationPit));
+				c.setText(Integer.toString(dest.infestationPit));
 			}
 		});
 		addInput(components, messages.getString("waypoint.spires"), new CustomActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].spire = getDigit(e);
+				dest.spire = getDigit(e);
 			}
 			void reverse(Object o)
 			{
 				JTextField c = (JTextField) o;
-				c.setText(Integer.toString(destination[i].spire));
+				c.setText(Integer.toString(dest.spire));
 			}
 		});
 		gridy++;
@@ -1249,24 +1331,24 @@ public class EcSwingX extends JXPanel implements EcReportable
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].nydusNetwork = getDigit(e);
+				dest.nydusNetwork = getDigit(e);
 			}
 			void reverse(Object o)
 			{
 				JTextField c = (JTextField) o;
-				c.setText(Integer.toString(destination[i].nydusNetwork));
+				c.setText(Integer.toString(dest.nydusNetwork));
 			}
 		});
 		addInput(components, messages.getString("waypoint.nydusWorms"), new CustomActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].nydusWorm = getDigit(e);
+				dest.nydusWorm = getDigit(e);
 			}
 			void reverse(Object o)
 			{
 				JTextField c = (JTextField) o;
-				c.setText(Integer.toString(destination[i].nydusWorm));
+				c.setText(Integer.toString(dest.nydusWorm));
 			}
 		});
 		gridy++;
@@ -1274,28 +1356,47 @@ public class EcSwingX extends JXPanel implements EcReportable
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].ultraliskCavern = getDigit(e);
+				dest.ultraliskCavern = getDigit(e);
 			}
 			void reverse(Object o)
 			{
 				JTextField c = (JTextField) o;
-				c.setText(Integer.toString(destination[i].ultraliskCavern));
+				c.setText(Integer.toString(dest.ultraliskCavern));
 			}
 		});
 		addInput(components, messages.getString("waypoint.greaterSpires"), new CustomActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				destination[i].greaterSpire = getDigit(e);
+				dest.greaterSpire = getDigit(e);
 			}
 			void reverse(Object o)
 			{
 				JTextField c = (JTextField) o;
-				c.setText(Integer.toString(destination[i].greaterSpire));
+				c.setText(Integer.toString(dest.greaterSpire));
 			}
 		});
 		gridy++;
-		inputControls.add(addButton(components, messages.getString("waypoint.reset"), 4, new ActionListener()
+		
+		int width = 4;
+		if (dest != destination.get(destination.size()-1)){ //add a "remove" button for all waypoints except the final destination
+			inputControls.add(addButton(components, messages.getString("waypoint.remove"), 1, new ActionListener()
+			{
+				public void actionPerformed(ActionEvent e)
+				{
+					inputControls.removeAll(Arrays.asList(components.getComponents()));
+					int selectedIndex = tabPane.getSelectedIndex();
+					destination.remove(dest);
+					waypointPanels.remove(components);
+					refreshTabs();
+					if (selectedIndex > 0)
+						tabPane.setSelectedIndex(selectedIndex-1); //if WP3 was removed, select WP2
+				}
+			}));
+			width = 3;
+		}
+		
+		inputControls.add(addButton(components, messages.getString("waypoint.reset"), width, new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
 			{
@@ -1433,6 +1534,7 @@ public class EcSwingX extends JXPanel implements EcReportable
 			@Override
 			public void actionPerformed(ActionEvent arg0)
 			{
+				running = false;
 				ec.stop();
 				goButton.setEnabled(true);
 				stopButton.setEnabled(false);
@@ -1451,12 +1553,13 @@ public class EcSwingX extends JXPanel implements EcReportable
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
+				running = true;
 				ec.reportInterface = ri;
 
 				for (JComponent j : inputControls)
 					j.setEnabled(false);
 				restartChamber();
-				tabPane.setSelectedIndex(6);
+				tabPane.setSelectedComponent(statsPanel);
 				timeStarted = new Date().getTime();
 				goButton.setEnabled(false);
 				stopButton.setEnabled(true);
@@ -1576,11 +1679,11 @@ public class EcSwingX extends JXPanel implements EcReportable
 
 	private EcState collapseWaypoints() throws CloneNotSupportedException
 	{
-		EcState finalDestination = (EcState) destination[destination.length - 1].clone();
-		for (int i = 0; i < destination.length - 1; i++)
+		EcState finalDestination = (EcState) destination.get(destination.size()-1).clone();
+		for (int i = 0; i < destination.size() - 1; i++)
 		{
-			if (destination[i].getSumStuff() > 1)
-				finalDestination.waypoints.add((EcState) destination[i].clone());
+			if (destination.get(i).getSumStuff() > 1)
+				finalDestination.waypoints.add((EcState) destination.get(i).clone());
 
 		}
 		return finalDestination;
@@ -1590,12 +1693,37 @@ public class EcSwingX extends JXPanel implements EcReportable
 	{
 		try
 		{
-			destination[destination.length - 1] = (EcState) s.clone();
-			destination[destination.length - 1].waypoints.clear();
+			//clear destinations
+			destination.clear();
+			
+			//rebuild destinations
+			EcState finalDestination = (EcState) s.clone();
+			finalDestination.waypoints.clear();
 			for (int i = 0; i < s.waypoints.size(); i++)
 			{
-				destination[i] = (EcState) s.waypoints.get(i).clone();
+				destination.add((EcState) s.waypoints.get(i).clone());
 			}
+			destination.add(finalDestination); //final destination goes last
+			
+			//clear panels
+			for (JPanel p : waypointPanels){
+				inputControls.removeAll(Arrays.asList(p.getComponents()));
+			}
+			waypointPanels.clear();
+			
+			//rebuild panels
+			for (int i = 0; i < destination.size()-1; i++)
+			{
+				JPanel lb = new JPanel(new GridBagLayout());
+				waypointPanels.add(lb);
+				addInputContainer(destination.get(i), lb);
+			}
+			JPanel finalDestinationPanel = new JPanel(new GridBagLayout());
+			waypointPanels.add(finalDestinationPanel); //final waypoint panel goes last
+			addInputContainer(destination.get(destination.size()-1), finalDestinationPanel);
+			
+			//rebuild the tabs
+			refreshTabs();
 		}
 		catch (CloneNotSupportedException e)
 		{
