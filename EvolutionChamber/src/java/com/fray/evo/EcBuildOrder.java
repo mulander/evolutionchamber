@@ -1,9 +1,7 @@
 package com.fray.evo;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 import org.apache.commons.collections.map.MultiValueMap;
 
@@ -142,8 +140,6 @@ public class EcBuildOrder extends EcState implements Serializable
 
 	public int mineralPatches()
 	{
-		if (patches.length < bases() * 8)
-			patches = new int[bases() * 8];
 		return bases() * 8;
 	}
 
@@ -156,11 +152,30 @@ public class EcBuildOrder extends EcState implements Serializable
 	public int	hatcheriesSpawningLarva = 0;
 	public int	nydusNetworkInUse = 0;
 
+    static double[][] cachedMineralsMined = new double[200][200];
+
+    public double mineMinerals() {
+        int mineralPatches = mineralPatches();
+        if(dronesOnMinerals <= 0 || mineralPatches <= 0)
+            return 0;
+
+        if(dronesOnMinerals >= 200 || mineralPatches >= 200)
+            return mineMineralsImpl();
+
+        if(cachedMineralsMined[mineralPatches][dronesOnMinerals] == 0)
+            cachedMineralsMined[mineralPatches][dronesOnMinerals] = mineMineralsImpl();
+
+        return cachedMineralsMined[mineralPatches][dronesOnMinerals];
+    }
+
 	// Mines minerals on all bases perfectly per one second.
-	public double mineMinerals()
+	private double mineMineralsImpl()
 	{
 		int drones = dronesOnMinerals;
-		int mineralPatches = mineralPatches();
+        int mineralPatches = mineralPatches();
+        if (patches.length < bases() * 8)
+			patches = new int[bases() * 8];
+
 		for (int i = 0; i < mineralPatches; i++)
 			patches[i] = 0;
 		for (int i = 0; i < mineralPatches; i++)
@@ -207,14 +222,29 @@ public class EcBuildOrder extends EcState implements Serializable
 				mineralsMined += 75.0 / 60.0; // Per TeamLiquid
 			else
 				mineralsMined += 100.0 / 60.0; // Per TeamLiquid
-		return mineralsMined;
+
+        return mineralsMined;
 	}
 
-	// Mines gas on all bases perfectly per one second.
-	public double mineGas()
-	{
-		if (gasExtractors == 0)
+    static double[][] cachedGasMined = new double[200][200];
+
+    public double mineGas()
+    {
+        if (gasExtractors == 0 || dronesOnGas == 0)
 			return 0;
+
+        if(gasExtractors >= 200 || dronesOnGas >= 200) 
+            return mineGasImpl();
+
+        if(cachedGasMined[gasExtractors][dronesOnGas] == 0)
+            cachedGasMined[gasExtractors][dronesOnGas] = mineGasImpl();
+
+        return cachedGasMined[gasExtractors][dronesOnGas];
+    }
+
+	// Mines gas on all bases perfectly per one second.
+	public double mineGasImpl()
+	{
 		int drones = dronesOnGas;
 		int[] extractors = new int[Math.min(gasExtractors,bases()*2)]; // Assign drones/patch
 		for (int i = 0; i < extractors.length; i++)
@@ -250,6 +280,7 @@ public class EcBuildOrder extends EcState implements Serializable
 				gasMined += 82.0 / 60.0; // Per TeamLiquid
 			else
 				gasMined += 114.0 / 60.0; // Per TeamLiquid
+
 		return gasMined;
 	}
 

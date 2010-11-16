@@ -503,7 +503,7 @@ public class EcState implements Serializable
 
 	public int getParityDrones(EcState s)
 	{
-		int optimalDrones = Math.min((Math.min(s.bases() * 16,3)) + (s.gasExtractors * 3), maxOverDrones);
+		int optimalDrones = Math.min((Math.min(s.bases(), 3) * 16) + (s.gasExtractors * 3), maxOverDrones);
 		int parityDrones = Math.min(s.getOverDrones(s), optimalDrones);
 
 		return parityDrones;
