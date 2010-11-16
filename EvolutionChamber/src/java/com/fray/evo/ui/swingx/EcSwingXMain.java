@@ -14,6 +14,7 @@ import javax.swing.JProgressBar;
 import javax.swing.SwingUtilities;
 
 import com.fray.evo.util.EcAutoUpdate;
+import com.fray.evo.util.EcAutoUpdateSS;
 import com.fray.evo.util.EcMessages;
 
 /**
@@ -23,7 +24,7 @@ import com.fray.evo.util.EcMessages;
  */
 public class EcSwingXMain {
 	public static final EcMessages messages = new EcMessages("com/fray/evo/ui/swingx/messages");
-	public static final String				EC_VERSION	= "0020";
+	public static final String				EC_VERSION	= "0019";
 	
 	public static void main(String args[]) {
 		final String iconLocation = "/com/fray/evo/ui/swingx/evolution_chamber.png";
@@ -93,7 +94,7 @@ public class EcSwingXMain {
 	
 	private static EcAutoUpdate checkForUpdates()
 	{
-		EcAutoUpdate ecUpdater = new EcAutoUpdate(EC_VERSION);
+		EcAutoUpdate ecUpdater = new EcAutoUpdateSS(EC_VERSION);
 		if (ecUpdater.isUpdateAvailable())
 		{
 			JOptionPane pane = new JOptionPane(

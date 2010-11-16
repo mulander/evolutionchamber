@@ -38,7 +38,7 @@ public class EcAutoUpdate extends SwingWorker<Void, Void> {
 		return updating;
 	}
 	
-	private String getLatestVersion(String ecVersion) {
+	protected String getLatestVersion(String ecVersion) {
 		String latestVersion = ecVersion;
 		// This implementation assumes that each version posted to the page is incremental
 		// if we miss a number (like in release 0011) the downloaded version will be 0010
