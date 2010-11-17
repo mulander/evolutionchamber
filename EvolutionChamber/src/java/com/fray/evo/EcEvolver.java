@@ -8,9 +8,10 @@ import org.jgap.IChromosome;
 import org.jgap.impl.IntegerGene;
 
 import com.fray.evo.action.EcAction;
-import com.fray.evo.action.EcActionWait;
 import com.fray.evo.action.EcActionExtractorTrick;
+import com.fray.evo.action.EcActionWait;
 import com.fray.evo.action.build.EcActionBuildDrone;
+import com.fray.evo.util.EcYabotEncoder;
 
 public class EcEvolver extends FitnessFunction
 {
@@ -145,9 +146,7 @@ public class EcEvolver extends FitnessFunction
 
 	public String doYABOTEvaluate(EcBuildOrder s)
 	{
-		StringBuilder sb = new StringBuilder();
-		
-		sb.append("1 [i] EC Optimized Build | 11 | EvolutionChamber | Add description here please. [/i] [s] ");
+		EcYabotEncoder encoder = new EcYabotEncoder("EC Optimized Build", "EvolutionChamber", "Add description here please.");
 		
 		int i = 0;
 		for (EcAction a : s.getActions())
@@ -166,15 +165,14 @@ public class EcEvolver extends FitnessFunction
 				
 				if (destination.isSatisfied(s))
 				{
-					sb.deleteCharAt(sb.length() - 1); // remove trailing pipe |
-					sb.append(" [/s]"); // Add ending tag
-					
-					if (sb.length() > 770)
+					String yabot = encoder.done();
+					final int max = 770;
+					if (yabot.length() > max)
 					{
-						sb.append("\nBuild was too long. Please trim it by " + (sb.length() - 770) + " characters or try a new build.");
-						sb.append("\nThis YABOT string will not work until you fix this!");
+						yabot += "\nBuild was too long. Please trim it by " + (yabot.length() - max) + " characters or try a new build.";
+						yabot += "\nThis YABOT string will not work until you fix this!";
 					}
-					return sb.toString();
+					return yabot;
 				}
 			}
 			
@@ -182,13 +180,13 @@ public class EcEvolver extends FitnessFunction
 			{
 				if(!(a instanceof EcActionExtractorTrick))
 				{
-					sb.append(" " + (int)s.supplyUsed + "  " + (int)s.minerals + "  " + (int)s.gas + "  " + s.timestamp() + " 1 " + a.yabotGetType(s) + "  " + a.yabotGetItem(s) + " 0" + a.yabotGetTag(s) + "|");
+					encoder.supply((int)s.supplyUsed).minerals((int)s.minerals).gas((int)s.gas).timestamp(s.timestamp()).type(Integer.parseInt(a.yabotGetType(s))).item(Integer.parseInt(a.yabotGetItem(s))).tag(a.yabotGetTag(s)).next();
 				}
 				else
 				{
 					// Yabot doesn't support extractor trick so the author suggested telling it to build an extractor and send a cancel string shortly after for the same building
-					sb.append(" " + (int)s.supplyUsed + "  " + (int)s.minerals + "  " + (int)s.gas + "  " + s.timestamp() + " 1 " + "0" + "  " + "35" + " 0" + " Extractor_Trick " + "|");
-					sb.append(" " + (int)s.supplyUsed + "  " + (int)s.minerals + "  " + (int)s.gas + "  " + s.timestampIncremented(3) + " 1 " + "0" + "  " + "35" + " 1" + " Extractor_Trick " + "|");
+					encoder.supply((int)s.supplyUsed).minerals((int)s.minerals).gas((int)s.gas).timestamp(s.timestamp()).type(0).item(35).tag("Extractor_Trick").next();
+					encoder.supply((int)s.supplyUsed).minerals((int)s.minerals).gas((int)s.gas).timestamp(s.timestampIncremented(3)).type(0).item(35).cancel(true).tag("Extractor_Trick").next();
 				}
 			}
 			
