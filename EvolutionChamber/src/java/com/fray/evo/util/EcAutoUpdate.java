@@ -38,6 +38,10 @@ public class EcAutoUpdate extends SwingWorker<Void, Void> {
 		return updating;
 	}
 	
+	public String getLatestVersion() {
+		return latestVersion;
+	}
+	
 	protected String getLatestVersion(String ecVersion) {
 		String latestVersion = ecVersion;
 		// This implementation assumes that each version posted to the page is incremental
