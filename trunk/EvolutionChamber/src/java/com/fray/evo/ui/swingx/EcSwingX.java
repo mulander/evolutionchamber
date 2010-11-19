@@ -267,7 +267,7 @@ public class EcSwingX extends JXPanel implements EcReportable
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				ec.seeds.remove(historyList.getSelectedValue());
+				ec.history.remove(historyList.getSelectedValue());
 				refreshHistory();
 				ec.saveSeeds();
 			}
@@ -351,7 +351,7 @@ public class EcSwingX extends JXPanel implements EcReportable
 	private void refreshHistory()
 	{
 		ArrayList<EcBuildOrder> results = new ArrayList<EcBuildOrder>();
-		for (EcBuildOrder destination : ec.seeds)
+		for (EcBuildOrder destination : ec.history)
 		{
 			EcBuildOrder source = new EcBuildOrder();
 			EcEvolver evolver = new EcEvolver(source, destination);
@@ -1534,8 +1534,8 @@ public class EcSwingX extends JXPanel implements EcReportable
 			@Override
 			public void actionPerformed(ActionEvent arg0)
 			{
+				ec.stopAllThreads();
 				running = false;
-				ec.stop();
 				goButton.setEnabled(true);
 				stopButton.setEnabled(false);
 				historyList.setEnabled(true);
@@ -1660,7 +1660,7 @@ public class EcSwingX extends JXPanel implements EcReportable
 	private void restartChamber()
 	{
 		if (ec.threads.size() > 0)
-			ec.stop();
+			ec.stopAllThreads();
 		try
 		{
 			EcState finalDestination = collapseWaypoints();
@@ -1682,9 +1682,8 @@ public class EcSwingX extends JXPanel implements EcReportable
 		EcState finalDestination = (EcState) destination.get(destination.size()-1).clone();
 		for (int i = 0; i < destination.size() - 1; i++)
 		{
-			if (destination.get(i).getSumStuff() > 1)
+			if (destination.get(i).getEstimatedActions() > 1)
 				finalDestination.waypoints.add((EcState) destination.get(i).clone());
-
 		}
 		return finalDestination;
 	}

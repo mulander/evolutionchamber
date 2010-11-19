@@ -72,7 +72,6 @@ public class EcRequirementTree
 		Map<Integer, Class> actions = EcAction.actions;
 		actions.clear();
 
-//		add(actions,new EcActionDoNothing(),destination);
 		add(actions,new EcActionWait(), destination);
 		add(actions,new EcActionBuildQueen(), destination);
 		add(actions,new EcActionBuildDrone(), destination);
@@ -86,7 +85,6 @@ public class EcRequirementTree
 
 		for (Class a : actions.values())
 			System.out.println(a.getSimpleName());
-
 	}
 
 	private static void actions(EcState destination, Map<Integer, Class> actions)
