@@ -266,7 +266,7 @@ public class EcEvolver extends FitnessFunction
 					int waypointIndex = 0;
 					for (EcState se : destination.waypoints)
 					{
-						if (se.targetSeconds == s.seconds && se.getSumStuff() > 0)
+						if (se.targetSeconds == s.seconds && se.getEstimatedActions() > 0)
 						{
 							log.println("---Waypoint " + waypointIndex + "---");
 							log.println(s.toCompleteString());

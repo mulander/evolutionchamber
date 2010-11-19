@@ -346,7 +346,6 @@ public class EcState implements Serializable
 
 	public boolean isSatisfied(EcState candidate)
 	{
-
 		if (waypoints.size() > 0)
 		{
 			EcState state = getMergedState();
@@ -535,12 +534,12 @@ public class EcState implements Serializable
 				+ gasExtractors + spire + spineCrawlers + sporeCrawlers + nydusWorm);
 	}
 
-	public int getSumStuff()
+	public int getEstimatedActions()
 	{
 		if (waypoints.size() > 0)
 		{
 			EcState state = getMergedState();
-			return state.getSumStuff();
+			return state.getEstimatedActions();
 		}
 
 		int i = requiredBases + lairs + hives + spawningPools + evolutionChambers + roachWarrens + hydraliskDen
@@ -605,7 +604,7 @@ public class EcState implements Serializable
 		if (chitinousPlating)
 			i++;
 		for (EcState s : waypoints)
-			i += s.getSumStuff();
+			i += s.getEstimatedActions();
 		return i;
 	}
 
