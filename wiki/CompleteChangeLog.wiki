@@ -14,6 +14,9 @@ This page will detail the changes made at each version.
   * Added internationalization support for the GUI
   * Waypoints can be added/removed in the GUI
   * Increased games played per second by 40% using a caching mechanism
+  * Fixed issue with waypoints ignoring bases and Goals not reporting bases
+  * Added a History tab
+  * Fixed an issue where parts of the window were cut off on smaller screen resolutions
 
 == v0020==
 
