@@ -61,6 +61,8 @@ public class EcActionUpgradeCarapace3 extends EcActionUpgrade
 		l.add(new EcActionBuildEvolutionChamber());
 		l.add(new EcActionBuildHive());
 		l.add(new EcActionUpgradeCarapace2());
+		destination.armor1 = true;
+		destination.armor2 = true;
 		return l;
 	}
 }

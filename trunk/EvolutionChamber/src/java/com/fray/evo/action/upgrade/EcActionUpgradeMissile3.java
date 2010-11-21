@@ -61,6 +61,8 @@ public class EcActionUpgradeMissile3 extends EcActionUpgrade
 		l.add(new EcActionBuildEvolutionChamber());
 		l.add(new EcActionBuildHive());
 		l.add(new EcActionUpgradeMissile2());
+		destination.missile2 = true;
+		destination.missile1 = true;
 		return l;
 	}
 }

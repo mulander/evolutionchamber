@@ -61,6 +61,8 @@ public class EcActionUpgradeFlyerAttacks3 extends EcActionUpgrade
 		l.add(new EcActionBuildSpire());
 		l.add(new EcActionBuildHive());
 		l.add(new EcActionUpgradeFlyerAttacks2());
+		destination.flyerAttack1 = true;
+		destination.flyerAttack2 = true;
 		return l;
 	}
 }
