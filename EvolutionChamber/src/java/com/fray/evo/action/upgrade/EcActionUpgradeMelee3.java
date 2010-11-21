@@ -61,6 +61,8 @@ public class EcActionUpgradeMelee3 extends EcActionUpgrade
 		l.add(new EcActionBuildEvolutionChamber());
 		l.add(new EcActionBuildHive());
 		l.add(new EcActionUpgradeMelee2());
+		destination.melee2 = true;
+		destination.melee1 = true;
 		return l;
 	}
 }

@@ -180,7 +180,14 @@ public class EcEvolver extends FitnessFunction
 			{
 				if(!(a instanceof EcActionExtractorTrick))
 				{
+					try
+					{
 					encoder.supply((int)s.supplyUsed).minerals((int)s.minerals).gas((int)s.gas).timestamp(s.timestamp()).type(Integer.parseInt(a.yabotGetType(s))).item(Integer.parseInt(a.yabotGetItem(s))).tag(a.yabotGetTag(s)).next();
+					}
+					catch (NumberFormatException n)
+					{
+						
+					}
 				}
 				else
 				{

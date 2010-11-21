@@ -54,6 +54,7 @@ public class EcActionBuildHive extends EcActionBuildBuilding implements Serializ
 	{
 		ArrayList<EcAction> l = new ArrayList<EcAction>();
 		l.add(new EcActionBuildInfestationPit());
+		destination.infestationPit = Math.min(1,destination.infestationPit);
 		return l;
 	}
 }

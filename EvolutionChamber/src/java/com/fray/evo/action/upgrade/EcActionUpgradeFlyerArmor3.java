@@ -61,6 +61,8 @@ public class EcActionUpgradeFlyerArmor3 extends EcActionUpgrade
 		l.add(new EcActionBuildSpire());
 		l.add(new EcActionBuildHive());
 		l.add(new EcActionUpgradeFlyerArmor2());
+		destination.flyerArmor1 = true;
+		destination.flyerArmor2 = true;
 		return l;
 	}
 }
