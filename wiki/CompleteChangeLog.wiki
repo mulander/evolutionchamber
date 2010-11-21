@@ -8,7 +8,7 @@ This page will detail the changes made at each version.
 
 = Change Logs by Release =
 
-== v0021 (in development) == 
+== v0022 == 
 
   * Added better Mac support
   * Added internationalization support for the GUI
