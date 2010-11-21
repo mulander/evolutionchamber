@@ -19,30 +19,43 @@ import com.fray.evo.util.EcMessages;
 
 /**
  * Contains the main method to launch the GUI application.
+ * 
  * @author mike.angstadt
- *
+ * 
  */
-public class EcSwingXMain {
-	public static final EcMessages messages = new EcMessages("com/fray/evo/ui/swingx/messages");
-	public static final String				EC_VERSION	= "0020";
-	
-	public static void main(String args[]) {
+public class EcSwingXMain
+{
+	public static final EcMessages	messages	= new EcMessages("com/fray/evo/ui/swingx/messages");
+	public static final String		EC_VERSION	= "0021";
+
+	public static void main(String args[])
+	{
 		final String iconLocation = "/com/fray/evo/ui/swingx/evolution_chamber.png";
-		
-		//run Mac OS X customizations if user is on a Mac
-		//this code must *literally* run before *anything* else graphics-related...putting this code at the beginning of EcSwingX.main() doesn't quite work--the application name (which appears as the first menu item in the Mac menu bar) does not get set--the only reason I can think of why this happens is that EcSwingX extends a class, so some static initialization code must be running before EcSwingX.main() gets executed 
-		MacSupport.initIfMac(messages.getString("title", EC_VERSION), false, iconLocation, new MacHandler() {
+
+		// run Mac OS X customizations if user is on a Mac
+		// this code must *literally* run before *anything* else
+		// graphics-related...putting this code at the beginning of
+		// EcSwingX.main() doesn't quite work--the application name (which
+		// appears as the first menu item in the Mac menu bar) does not get
+		// set--the only reason I can think of why this happens is that EcSwingX
+		// extends a class, so some static initialization code must be running
+		// before EcSwingX.main() gets executed
+		MacSupport.initIfMac(messages.getString("title", EC_VERSION), false, iconLocation, new MacHandler()
+		{
 			@Override
-			public void handleQuit(Object applicationEvent) {
+			public void handleQuit(Object applicationEvent)
+			{
 				System.exit(0);
 			}
 
 			@Override
-			public void handleAbout(Object applicationEvent) {
-				JOptionPane.showMessageDialog(null, messages.getString("about.message", EC_VERSION), messages.getString("about.title"), JOptionPane.INFORMATION_MESSAGE);
+			public void handleAbout(Object applicationEvent)
+			{
+				JOptionPane.showMessageDialog(null, messages.getString("about.message", EC_VERSION), messages
+						.getString("about.title"), JOptionPane.INFORMATION_MESSAGE);
 			}
 		});
-		
+
 		SwingUtilities.invokeLater(new Runnable()
 		{
 			@Override
@@ -91,15 +104,15 @@ public class EcSwingXMain {
 			}
 		});
 	}
-	
+
 	private static EcAutoUpdate checkForUpdates()
 	{
 		EcAutoUpdate ecUpdater = new EcAutoUpdateSS(EC_VERSION);
 		if (ecUpdater.isUpdateAvailable())
 		{
-			JOptionPane pane = new JOptionPane(
-					messages.getString("update.updateAvailable.message"));
-			Object[] options = new String[] { messages.getString("update.updateAvailable.yes"), messages.getString("update.updateAvailable.no") };
+			JOptionPane pane = new JOptionPane(messages.getString("update.updateAvailable.message"));
+			Object[] options = new String[] { messages.getString("update.updateAvailable.yes"),
+					messages.getString("update.updateAvailable.no") };
 			pane.setOptions(options);
 			JDialog dialog = pane.createDialog(new JFrame(), messages.getString("update.updateAvailable.title"));
 			dialog.setVisible(true);

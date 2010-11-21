@@ -38,7 +38,9 @@ public class EcBuildOrder extends EcState implements Serializable
 	
 	public EcBuildOrder(EcState importDestination)
 	{
-		assign(importDestination);
+		//Fixed: Need to assign this to the variable, not the other way around.
+		//-Lomilar
+		importDestination.assign(this);
 	}
 
 	@Override
