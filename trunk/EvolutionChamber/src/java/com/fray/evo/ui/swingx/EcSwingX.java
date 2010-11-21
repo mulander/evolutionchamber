@@ -60,6 +60,7 @@ import com.fray.evo.EcState;
 import com.fray.evo.EvolutionChamber;
 import com.fray.evo.action.EcAction;
 
+//TODO: Refactor this monster. - Lomilar
 public class EcSwingX extends JXPanel implements EcReportable
 {
 	private JTextArea			outputText;
@@ -239,15 +240,6 @@ public class EcSwingX extends JXPanel implements EcReportable
 	private void addStart(JPanel start)
 	{
 		historyList = new JList();
-//		historyList.addPropertyChangeListener(new PropertyChangeListener()
-//		{
-//			@Override
-//			public void propertyChange(PropertyChangeEvent arg0)
-//			{
-//				historyList.setFixedCellWidth(start.getWidth());
-//			
-//			}
-//		});
 		historyList.setMaximumSize(new Dimension(80, 100));
 		JScrollPane scrollPane = new JScrollPane(historyList);
 		scrollPane.setPreferredSize(start.getSize());
