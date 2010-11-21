@@ -26,7 +26,7 @@ import com.fray.evo.util.EcMessages;
 public class EcSwingXMain
 {
 	public static final EcMessages	messages	= new EcMessages("com/fray/evo/ui/swingx/messages");
-	public static final String		EC_VERSION	= "0021";
+	public static final String		EC_VERSION	= "0022";
 
 	public static void main(String args[])
 	{
