@@ -191,6 +191,7 @@ public class EcEvolver extends FitnessFunction
 					}
 					catch (NumberFormatException e)
 					{
+						warnings.add("Unknown type: '" + a.yabotGetType(s) + "'.");
 					}
 
 					int item = 0;
@@ -200,6 +201,7 @@ public class EcEvolver extends FitnessFunction
 					}
 					catch (NumberFormatException e)
 					{
+						warnings.add("Unknown item: '" + a.yabotGetItem(s) + "'.");
 					}
 					encoder.supply((int) s.supplyUsed).minerals((int) s.minerals).gas((int) s.gas).timestamp(
 							s.timestamp()).type(type).item(item).tag(a.yabotGetTag(s)).next();
