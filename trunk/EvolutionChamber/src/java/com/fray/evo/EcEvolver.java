@@ -1,6 +1,7 @@
 package com.fray.evo;
 
 import java.io.PrintStream;
+import java.util.ArrayList;
 
 import org.jgap.FitnessFunction;
 import org.jgap.Gene;
@@ -11,6 +12,7 @@ import com.fray.evo.action.EcAction;
 import com.fray.evo.action.EcActionExtractorTrick;
 import com.fray.evo.action.EcActionWait;
 import com.fray.evo.action.build.EcActionBuildDrone;
+import com.fray.evo.util.EcUtil;
 import com.fray.evo.util.EcYabotEncoder;
 
 public class EcEvolver extends FitnessFunction
@@ -148,6 +150,8 @@ public class EcEvolver extends FitnessFunction
 	{
 		EcYabotEncoder encoder = new EcYabotEncoder("EC Optimized Build", "EvolutionChamber", "Add description here please.");
 		
+		ArrayList<String> warnings = new ArrayList<String>();
+		
 		int i = 0;
 		for (EcAction a : s.getActions())
 		{
@@ -160,7 +164,7 @@ public class EcEvolver extends FitnessFunction
 			{					
 				if (s.seconds >= s.targetSeconds || destination.waypointMissed(s))
 				{
-					return "No finished build yet. A waypoint was not reached.";
+					return "No finished build yet. A waypoint was not reached.\n"+EcUtil.toString(warnings);
 				}
 				
 				if (destination.isSatisfied(s))
@@ -172,7 +176,7 @@ public class EcEvolver extends FitnessFunction
 						yabot += "\nBuild was too long. Please trim it by " + (yabot.length() - max) + " characters or try a new build.";
 						yabot += "\nThis YABOT string will not work until you fix this!";
 					}
-					return yabot;
+					return yabot+"\n"+EcUtil.toString(warnings);
 				}
 			}
 			
@@ -180,14 +184,26 @@ public class EcEvolver extends FitnessFunction
 			{
 				if(!(a instanceof EcActionExtractorTrick))
 				{
+					int type = 0;
 					try
 					{
-					encoder.supply((int)s.supplyUsed).minerals((int)s.minerals).gas((int)s.gas).timestamp(s.timestamp()).type(Integer.parseInt(a.yabotGetType(s))).item(Integer.parseInt(a.yabotGetItem(s))).tag(a.yabotGetTag(s)).next();
+						type = Integer.parseInt(a.yabotGetType(s));
 					}
-					catch (NumberFormatException n)
+					catch (NumberFormatException e)
 					{
-						
 					}
+
+					int item = 0;
+					try
+					{
+						item = Integer.parseInt(a.yabotGetItem(s));
+					}
+					catch (NumberFormatException e)
+					{
+					}
+					encoder.supply((int) s.supplyUsed).minerals((int) s.minerals).gas((int) s.gas).timestamp(
+							s.timestamp()).type(type).item(item).tag(a.yabotGetTag(s)).next();
+
 				}
 				else
 				{
@@ -200,7 +216,7 @@ public class EcEvolver extends FitnessFunction
 			a.execute(s, this);
 		}
 
-		return "No finished build yet. Ran out of things to do.";
+		return "No finished build yet. Ran out of things to do.\n"+EcUtil.toString(warnings);
 	}
 	
 	public static EcBuildOrder populateBuildOrder(EcBuildOrder source, IChromosome arg0)
