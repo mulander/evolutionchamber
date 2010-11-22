@@ -36,8 +36,8 @@ public class EcYabotEncoderTest {
 	@Test
 	public void testBuildSteps() {
 		EcYabotEncoder encoder = new EcYabotEncoder("Build name", "John Smith", "This is my build order.");
-		encoder.supply(8).minerals(27).gas(0).timestamp("0:22").type(0).item(35).next(); //no tag
-		encoder.supply(7).minerals(203).gas(0).timestamp("1:06").type(0).item(41).next(); //no tag
+		encoder.supply(8).minerals(27).gas(0).timestamp("0:22").action(EcYabotEncoder.Action.Extractor).next(); //using action() method, no tag
+		encoder.supply(7).minerals(203).gas(0).timestamp("1:06").type(0).item(41).next(); //using type() and item() methods, no tag
 		encoder.supply(8).minerals(3).gas(20).timestamp("1:52").type(0).item(0).tag("Add_1_drone_to_gas").next();
 		String yabot = encoder.done();
 		Assert.assertEquals("1 [i] Build name | 11 | John Smith | This is my build order. [/i] [s] 8 27 0 0:22 1 0 35 0   | 7 203 0 1:06 1 0 41 0   | 8 3 20 1:52 1 0 0 0 Add_1_drone_to_gas [/s]", yabot);
@@ -49,7 +49,7 @@ public class EcYabotEncoderTest {
 	@Test
 	public void testReset() {
 		EcYabotEncoder encoder = new EcYabotEncoder("Build name", "John Smith", "This is my build order.");
-		encoder.supply(8).minerals(27).gas(0).timestamp("0:22").type(0).item(35).next();
+		encoder.supply(8).minerals(27).gas(0).timestamp("0:22").action(EcYabotEncoder.Action.Extractor).next();
 		encoder.supply(7).minerals(203).gas(0).timestamp("1:06").type(0).item(41).next();
 		encoder.supply(8).minerals(3).gas(20).timestamp("1:52").type(0).item(0).tag("Add_1_drone_to_gas").next();
 		encoder.done();
