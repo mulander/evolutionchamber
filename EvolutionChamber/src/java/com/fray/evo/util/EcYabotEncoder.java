@@ -7,9 +7,25 @@ import java.util.List;
  * Creates YABOT build order strings.
  * 
  * @author mike.angstadt
- * 
  */
 public class EcYabotEncoder {
+	/**
+	 * Represents a unit, building, or upgrade.
+	 * 
+	 * @author mike.angstadt
+	 */
+	public static enum Action {
+		BanelingNest(0, 33), EvolutionChamber(0, 34), Extractor(0, 35), Hatchery(0, 36), HydraliskDen(0, 37), InfestationPit(0, 38), NydusNetwork(0, 39), RoachWarren(0, 40), SpawningPool(0, 41), SpineCrawler(0, 42), GreaterSpire(2, 5), Spire(0, 43), SporeCrawler(0, 44), UltraliskCavern(0, 45), Corruptor(1, 27), Drone(1, 28), Hydralisk(1, 29), Infestor(1, 38), Mutalisk(1, 30), Overlord(1, 31), Queen(1, 32), Roach(1, 33), Ultralisk(1, 34), Zergling(1, 035), Lair(2, 3), Hive(2, 4), BroodLord(2, 6), Baneling(2, 7), Overseer(2, 8), Carapace(3, 28), Melee(3, 29), FlyerAttack(3, 31), FlyerArmor(3, 30), Missile(3, 32), GroovedSpines(3, 33), PneumatizedCarapace(3, 34), GlialReconstitution(3, 36), TunnelingClaws(3, 38), ChitinousPlating(3, 40), AdrenalGlands(3, 41), MetabolicBoost(3, 42), Burrow(3, 44), CentrifugalHooks(3, 45), NeuralParasite(3, 49), PathogenGlands(3, 50);
+
+		public final int type;
+		public final int item;
+
+		private Action(int type, int item) {
+			this.type = type;
+			this.item = item;
+		}
+	};
+
 	/**
 	 * The name of the build order.
 	 */
@@ -82,11 +98,11 @@ public class EcYabotEncoder {
 	}
 
 	/**
-	 * Sets the timestamp of the current build step.
+	 * Sets the timestamp of the current build step. Defaults to "0:0".
 	 * 
 	 * @param timestamp should be in the format "h:m:s". For example, "1:04:32"
 	 * for one hour, four minutes, thirty-two seconds.
-	 * @return
+	 * @return this
 	 */
 	public EcYabotEncoder timestamp(String timestamp) {
 		curStep.timestamp = timestamp;
@@ -94,7 +110,21 @@ public class EcYabotEncoder {
 	}
 
 	/**
-	 * Sets the type number of the current build step.
+	 * Specifies the unit, building, or upgrade involved in this build step.
+	 * 
+	 * @param action the unit, building or upgrade
+	 * @return this
+	 */
+	public EcYabotEncoder action(Action action) {
+		curStep.type = action.type;
+		curStep.item = action.item;
+		return this;
+	}
+
+	/**
+	 * Sets the type number of the current build step. You should use the
+	 * action() method instead, unless you want to manually set this value
+	 * yourself.
 	 * 
 	 * @param type
 	 * @return this
@@ -105,7 +135,9 @@ public class EcYabotEncoder {
 	}
 
 	/**
-	 * Sets the item number of the current build step.
+	 * Sets the item number of the current build step. You should use the
+	 * action() method instead, unless you want to manually set this value
+	 * yourself.
 	 * 
 	 * @param item
 	 * @return this
@@ -128,7 +160,7 @@ public class EcYabotEncoder {
 	}
 
 	/**
-	 * Sets the tag of the current build step. Defaults to empty string.
+	 * Sets the tag of the current build step. Defaults to a single space.
 	 * 
 	 * @param tag
 	 * @return this
@@ -156,6 +188,17 @@ public class EcYabotEncoder {
 	 * @return the YABOT string
 	 */
 	public String done() {
+		String yabot = toString();
+
+		//reset so a new YABOT string can be created with the same object
+		curStep = new BuildStep();
+		steps.clear();
+
+		return yabot;
+	}
+	
+	@Override
+	public String toString(){
 		StringBuilder sb = new StringBuilder();
 
 		sb.append("1 [i] " + name + " | 11 | " + author + " | " + description + " [/i]");
@@ -169,11 +212,7 @@ public class EcYabotEncoder {
 			}
 			sb.append(" [/s]");
 		}
-
-		//reset so a new YABOT string can be created with the same object
-		curStep = new BuildStep();
-		steps.clear();
-
+		
 		return sb.toString();
 	}
 
@@ -187,11 +226,11 @@ public class EcYabotEncoder {
 		public int supply = 0;
 		public int minerals = 0;
 		public int gas = 0;
-		public String timestamp = "0:0";
+		public String timestamp;
 		public int type = 0;
 		public int item = 0;
 		public boolean cancel = false;
-		public String tag = " ";
+		public String tag;
 
 		@Override
 		public String toString() {
@@ -199,12 +238,25 @@ public class EcYabotEncoder {
 			sb.append(supply);
 			sb.append(" " + minerals);
 			sb.append(" " + gas);
-			sb.append(" " + timestamp);
+
+			sb.append(" ");
+			if (timestamp == null) {
+				sb.append("0:0");
+			} else {
+				sb.append(timestamp);
+			}
+
 			sb.append(" 1");
 			sb.append(" " + type);
 			sb.append(" " + item);
 			sb.append(" " + (cancel ? "1" : "0"));
-			sb.append(" " + tag);
+
+			sb.append(" ");
+			if (tag == null) {
+				sb.append(" ");
+			} else {
+				sb.append(tag);
+			}
 			return sb.toString();
 		}
 	}
