@@ -67,8 +67,10 @@ public class MacSupport {
 
 			// equivalent to: applicationInstance.setEnabledPreferencesMenu(true);
 			// the preferences menu option is disabled by default
-			Method setEnabledPreferencesMenuMethod = applicationClass.getMethod("setEnabledPreferencesMenu", boolean.class);
-			setEnabledPreferencesMenuMethod.invoke(applicationInstance, enablePreferences);
+			if (enablePreferences){
+				Method setEnabledPreferencesMenuMethod = applicationClass.getMethod("setEnabledPreferencesMenu", boolean.class);
+				setEnabledPreferencesMenuMethod.invoke(applicationInstance, enablePreferences);
+			}
 
 			// equivalent to: applicationInstance.addApplicationListener(applicationAdapterImplementation);
 			Method addApplicationListenerMethod = applicationClass.getMethod("addApplicationListener", applicationListenerInterface);
