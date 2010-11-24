@@ -1,6 +1,7 @@
 package com.fray.evo.action;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -49,10 +50,10 @@ public abstract class EcAction implements Serializable
 		if (isPossible(s))
 			return true;
 		s.seconds += 1;
-		Collection<Runnable> futureActions = s.getFutureActions(s.seconds);
+		ArrayList<Runnable> futureActions = s.getFutureActions(s.seconds);
 		if (futureActions != null)
-			for (Runnable r : futureActions)
-				r.run();
+			for (int i = 0; i < futureActions.size(); ++i)
+				futureActions.get(i).run();
 		s.accumulateMaterials();
 		return false;
 	}

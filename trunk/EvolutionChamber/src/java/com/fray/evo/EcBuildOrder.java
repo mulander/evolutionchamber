@@ -3,8 +3,7 @@ package com.fray.evo;
 import java.io.Serializable;
 import java.util.*;
 
-import org.apache.commons.collections.map.MultiValueMap;
-
+import com.fray.evo.util.ActionList;
 import com.fray.evo.action.EcAction;
 
 public class EcBuildOrder extends EcState implements Serializable
@@ -21,7 +20,7 @@ public class EcBuildOrder extends EcState implements Serializable
 	public int				evolutionChambersInUse;
 	public boolean 			droneIsScouting		= false;
 
-	transient MultiValueMap	futureAction		= new MultiValueMap();
+	transient ActionList	futureAction		= new ActionList();
 	public ArrayList<EcAction>		actions				= new ArrayList<EcAction>();
 
 	public EcBuildOrder()
@@ -85,28 +84,26 @@ public class EcBuildOrder extends EcState implements Serializable
 		actions.add(ecActionBuildDrone);
 	}
 
-	public void addFutureAction(double time, Runnable runnable)
+	public void addFutureAction(int time, Runnable runnable)
 	{
 		time = seconds + time;
 		if (futureAction == null)
-			futureAction = new MultiValueMap();
+			futureAction = new ActionList();
 		futureAction.put(time, runnable);
 		actionLength++;
 	}
 
-	public Collection<Runnable> getFutureActions(double time)
+	public ArrayList<Runnable> getFutureActions(int time)
 	{
-		Object result = futureAction.get(time);
+		ArrayList<Runnable> result = futureAction.get(time);
 		if (result == null)
 			return null;
-		return (Collection<Runnable>) result;
+		return result;
 	}
-	public boolean nothingGoingToHappen(double time)
+
+	public boolean nothingGoingToHappen()
 	{
-		for (double t : (Collection<Double>)futureAction.keySet())
-			if (t > time)
-				return false;
-		return true;
+		return futureAction.hasFutureActions();
 	}
 
 	public void consumeLarva(final EcEvolver e)
