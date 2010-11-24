@@ -1,7 +1,5 @@
 package com.fray.evo.util;
 
-import static com.fray.evo.ui.swingx.EcSwingXMain.messages;
-
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -11,8 +9,6 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.swing.JOptionPane;
 
 /**
  * Auto-updates the application. Gets the latest version by screen-scraping the
@@ -41,8 +37,8 @@ public class EcAutoUpdateSS extends EcAutoUpdate {
 	 * @param ecVersion the version of the currently running application.
 	 * Expected to look like "0017".
 	 */
-	public EcAutoUpdateSS(String ecVersion) {
-		super(ecVersion);
+	public EcAutoUpdateSS(String ecVersion, Callback callback) {
+		super(ecVersion, callback);
 	}
 
 	@Override
@@ -79,7 +75,7 @@ public class EcAutoUpdateSS extends EcAutoUpdate {
 		} catch (UnknownHostException e) {
 			// If this happens then our network connection is probably down.
 			// We return the current version as there is no way to download any updates.
-			JOptionPane.showMessageDialog(null, messages.getString("update.checkFailed.message"), messages.getString("update.checkFailed.title"), JOptionPane.WARNING_MESSAGE);
+			callback.updateCheckFailed();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
