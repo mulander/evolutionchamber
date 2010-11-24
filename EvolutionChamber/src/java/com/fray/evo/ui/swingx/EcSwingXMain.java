@@ -27,11 +27,10 @@ public class EcSwingXMain
 {
 	public static final EcMessages	messages	= new EcMessages("com/fray/evo/ui/swingx/messages");
 	public static final String		EC_VERSION	= "0022";
+	public static final String iconLocation = "/com/fray/evo/ui/swingx/evolution_chamber.png";
 
 	public static void main(String args[])
 	{
-		final String iconLocation = "/com/fray/evo/ui/swingx/evolution_chamber.png";
-
 		// run Mac OS X customizations if user is on a Mac
 		// this code must *literally* run before *anything* else
 		// graphics-related...putting this code at the beginning of
@@ -82,6 +81,7 @@ public class EcSwingXMain
 
 				final JFrame updateFrame = new JFrame();
 				updateFrame.setTitle(messages.getString("update.title"));
+				updateFrame.setIconImage(icon.getImage());
 				JLabel waiting = new JLabel(messages.getString("update.checking"));
 				updateFrame.getContentPane().setLayout(new FlowLayout());
 				updateFrame.getContentPane().add(waiting);
@@ -98,7 +98,7 @@ public class EcSwingXMain
 						// Show the main window only when there are no updates
 						// running
 						frame.setVisible(!ecUpdater.isUpdating());
-						updateFrame.setVisible(ecUpdater.isUpdating());
+						updateFrame.dispose();
 					}
 				});
 			}
@@ -111,18 +111,21 @@ public class EcSwingXMain
 		if (ecUpdater.isUpdateAvailable())
 		{
 			JOptionPane pane = new JOptionPane(messages.getString("update.updateAvailable.message"));
-			Object[] options = new String[] { messages.getString("update.updateAvailable.yes"),
-					messages.getString("update.updateAvailable.no") };
-			pane.setOptions(options);
-			JDialog dialog = pane.createDialog(new JFrame(), messages.getString("update.updateAvailable.title"));
+			String yes = messages.getString("update.updateAvailable.yes");
+			String no = messages.getString("update.updateAvailable.no");
+			pane.setOptions(new String[] { yes, no });
+			JDialog dialog = pane.createDialog(new JFrame(), messages.getString("update.updateAvailable.title", ecUpdater.getLatestVersion()));
 			dialog.setVisible(true);
 
-			Object obj = pane.getValue();
+			Object selection = pane.getValue();
 
-			if (options[0].equals(obj))
-			{ // User selection = "Yes"
+			if (selection.equals(yes))
+			{
 				JFrame updateFrame = new JFrame();
 				updateFrame.setTitle(messages.getString("update.updating.title"));
+				updateFrame.setResizable(false);
+				ImageIcon icon = new ImageIcon(EcSwingXMain.class.getResource(iconLocation));
+				updateFrame.setIconImage(icon.getImage());
 
 				final JProgressBar updateProgress = new JProgressBar(0, 100);
 				updateProgress.setValue(0);
@@ -142,6 +145,7 @@ public class EcSwingXMain
 						}
 					}
 				});
+				ecUpdater.setUpdating(true);
 				ecUpdater.execute();
 			}
 		}
