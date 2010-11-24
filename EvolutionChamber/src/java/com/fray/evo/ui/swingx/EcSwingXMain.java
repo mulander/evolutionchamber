@@ -107,7 +107,19 @@ public class EcSwingXMain
 
 	private static EcAutoUpdate checkForUpdates()
 	{
-		EcAutoUpdate ecUpdater = new EcAutoUpdateSS(EC_VERSION);
+		EcAutoUpdate ecUpdater = new EcAutoUpdateSS(EC_VERSION, new EcAutoUpdate.Callback(){
+			@Override
+			public void checksumFailed()
+			{
+				JOptionPane.showMessageDialog(null, messages.getString("update.checksumFailed.message"), messages.getString("update.checksumFailed.title"), JOptionPane.ERROR_MESSAGE);
+			}
+			
+			@Override
+			public void updateCheckFailed()
+			{
+				JOptionPane.showMessageDialog(null, messages.getString("update.updateCheckFailed.message"), messages.getString("update.updateCheckFailed.title"), JOptionPane.WARNING_MESSAGE);
+			}
+		});
 		if (ecUpdater.isUpdateAvailable())
 		{
 			JOptionPane pane = new JOptionPane(messages.getString("update.updateAvailable.message"));

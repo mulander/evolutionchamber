@@ -1,7 +1,5 @@
 package com.fray.evo.util;
 
-import static com.fray.evo.ui.swingx.EcSwingXMain.messages;
-
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -19,7 +17,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 
 /**
@@ -33,6 +30,11 @@ public class EcAutoUpdate extends SwingWorker<Void, Void> {
 	private static final String downloadUrlFormat = "http://evolutionchamber.googlecode.com/files/evolutionchamber-version-%s.jar";
 	
 	/**
+	 * The format of the filename that is given to the downloaded JAR file.
+	 */
+	private static final String downloadedFileNameFormat = "evolutionchamber-version-%s.jar";
+	
+	/**
 	 * The format of the URL that contains the JAR file's checksum.
 	 */
 	private static final String	checksumUrlFormat = "http://code.google.com/p/evolutionchamber/downloads/detail?name=evolutionchamber-version-%s.jar";
@@ -40,7 +42,7 @@ public class EcAutoUpdate extends SwingWorker<Void, Void> {
 	/**
 	 * The regular expression used to scrape the checksum from the webpage of the JAR file.
 	 */
-	private static final Pattern checksumPattern = Pattern.compile("SHA1 Checksum: ([0-9a-f]+)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
+	private static final Pattern checksumPattern = Pattern.compile("SHA1 Checksum: ([0-9a-f]{40})", Pattern.CASE_INSENSITIVE);
 	
 	/**
 	 * Whether or not there is a newer version available.
@@ -68,10 +70,16 @@ public class EcAutoUpdate extends SwingWorker<Void, Void> {
 	private boolean				checksumMatches = true;
 
 	/**
+     * Allows the code calling this class to handle certain auto-updater events.
+     */
+	protected final Callback callback;
+
+	/**
 	 * Constructor.
 	 * @param ecVersion the version of the currently running application. For example, "0017".
 	 */
-	public EcAutoUpdate(String ecVersion) {
+	public EcAutoUpdate(String ecVersion, Callback callback) {
+		this.callback = callback;
 		this.latestVersion	 	= findLatestVersion(ecVersion);
 		
 		if( !this.latestVersion.equals( ecVersion ) )
@@ -111,6 +119,14 @@ public class EcAutoUpdate extends SwingWorker<Void, Void> {
 	}
 	
 	/**
+	 * Whether or not the checksum of the downloaded file matches the expected checksum.
+	 * @return true if the file checksum matches the expected checksum
+	 */
+    public boolean isChecksumMatches() {
+		return checksumMatches;
+	}
+	
+	/**
 	 * Determines what the latest version of the application is.
 	 * @param ecVersion the version of the currently running application. For example, "0017".
 	 * @return the latest version number
@@ -134,12 +150,30 @@ public class EcAutoUpdate extends SwingWorker<Void, Void> {
 		} catch (UnknownHostException e) {
 			// If this happens then our network connection is probably down.
 			// We return the current version as there is no way to download any updates.
-			JOptionPane.showMessageDialog(null, messages.getString("update.checkFailed.message"), messages.getString("update.checkFailed.title"), JOptionPane.WARNING_MESSAGE);
+			callback.updateCheckFailed();
 			latestVersion = ecVersion;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return latestVersion;
+	}
+	
+	/**
+	 * Gets an inputstream to the file and the length of the file.
+	 * @param version the version to retrieve
+	 * @return an inputstream to the file and the length of the file
+	 * @throws IOException
+	 */
+	protected FileInfo getFileInputStreamAndLength(String version) throws IOException
+	{
+		URL downloadUrl = new URL(String.format(downloadUrlFormat, version));
+		URLConnection uc 	= downloadUrl.openConnection();
+	    String contentType 	= uc.getContentType();
+	    int contentLength 	= uc.getContentLength();
+	    if (contentType.startsWith("text/") || contentLength == -1) {
+	    	throw new IOException("This is not a binary file.");
+	    }
+	    return new FileInfo(uc.getInputStream(), contentLength);
 	}
 	
     @Override
@@ -148,33 +182,12 @@ public class EcAutoUpdate extends SwingWorker<Void, Void> {
         setProgress(0);
         this.updating = true;
 		try {
-			//get the file's checksum from the website
-			String pageChecksum = null;
-			{
-				//download the page that contains the checksum
-				URL checksumUrl = new URL(String.format(checksumUrlFormat, this.latestVersion));
-				HttpURLConnection conn = (HttpURLConnection) checksumUrl.openConnection();
-				BufferedInputStream in = new BufferedInputStream(conn.getInputStream());
-				ByteArrayOutputStream out = new ByteArrayOutputStream();
-				int read;
-				while ((read = in.read()) != -1) {
-					out.write(read);
-				}
-				String html = new String(out.toByteArray());
-				in.close();
-				out.close();
-				
-				//scrape the checksum from the page
-				Matcher m = checksumPattern.matcher(html);
-				if (m.find()){
-					pageChecksum = m.group(1);
-				}
-			}
+			//get the file's expected checksum from the website
+			String expectedChecksum = getExpectedChecksum(latestVersion);
 
 			//determine whether or not the JAR needs to be downloaded
 			boolean download = true;
-			URL downloadUrl = new URL(String.format(downloadUrlFormat, this.latestVersion));
-			File file = new File(downloadUrl.getFile().substring( downloadUrl.getFile().lastIndexOf('/') + 1));
+			File file = new File(String.format(downloadedFileNameFormat, this.latestVersion));
 			MessageDigest md = MessageDigest.getInstance("SHA-1");
 			if (file.exists()){
 				//the user might have already downloaded the update, but is still running the old version
@@ -190,7 +203,7 @@ public class EcAutoUpdate extends SwingWorker<Void, Void> {
 				String fileChecksum = convertToHex(md.digest());
 				
 				//compare checksums
-				if (pageChecksum != null && pageChecksum.equalsIgnoreCase(fileChecksum)){
+				if (expectedChecksum != null && expectedChecksum.equalsIgnoreCase(fileChecksum)){
 					//if the checksum matches, then there's no need to download the file again
 					download = false;
 					checksumMatches = true;
@@ -198,19 +211,13 @@ public class EcAutoUpdate extends SwingWorker<Void, Void> {
 			}
 			
 			if (download){
-				//check to make sure the URL points to the JAR file (binary data) and not something else
-			    URLConnection uc 	= downloadUrl.openConnection();
-			    String contentType 	= uc.getContentType();
-			    int contentLength 	= uc.getContentLength();
-			    if (contentType.startsWith("text/") || contentLength == -1) {
-			      throw new IOException("This is not a binary file.");
-			    }
+				FileInfo info = getFileInputStreamAndLength(latestVersion);
 			    
 			    //download the file and also compute its checksum
 			    String fileChecksum;
 			    {
 					FileOutputStream out = new FileOutputStream(file);
-				    InputStream raw = uc.getInputStream();
+				    InputStream raw = info.inputStream;
 				    InputStream in 	= new BufferedInputStream(raw);
 				    byte[] buf = new byte[1024];
 				    int bytesRead = 0;
@@ -219,21 +226,21 @@ public class EcAutoUpdate extends SwingWorker<Void, Void> {
 				    	md.update(buf, 0, bytesRead);
 				    	out.write(buf, 0, bytesRead);
 				    	offset += bytesRead;
-				    	progress = (int)( (offset / (float)contentLength) * 100 );
+				    	progress = (int)( (offset / (float)info.length) * 100 );
 					    setProgress(progress);
 				    }
 				    fileChecksum = convertToHex(md.digest());
 				    in.close();
 				    out.close();
 				    
-				    if (offset != contentLength) {
-				        throw new IOException("Only read " + offset + " bytes; Expected " + contentLength + " bytes");
+				    if (offset != info.length) {
+				        throw new IOException("Only read " + offset + " bytes; Expected " + info.length + " bytes");
 				    }
 			    }
 			    
 			    //compare checksums
 			    //skip the checksum comparison if, for whatever reason, the checksum couldn't be scraped from the website
-			    checksumMatches = pageChecksum == null || pageChecksum.equalsIgnoreCase(fileChecksum);
+			    checksumMatches = expectedChecksum == null || expectedChecksum.equalsIgnoreCase(fileChecksum);
 			}
 
 			this.jarFile = file.getName();
@@ -246,6 +253,39 @@ public class EcAutoUpdate extends SwingWorker<Void, Void> {
 			e.printStackTrace();
 		}
         return null;
+    }
+    
+
+    /**
+     * Scrapes the checksum for the JAR file of the given version from the website.
+     * @param version the version of the application to get the checksum for
+     * @return the checksum or null if it couldn't find the checksum
+     * @throws IOException if there's a problem loading the page
+     */
+    public static String getExpectedChecksum(String version) throws IOException
+    {
+    	String pageChecksum = null;
+    	
+		//download the page that contains the checksum
+		URL checksumUrl = new URL(String.format(checksumUrlFormat, version));
+		HttpURLConnection conn = (HttpURLConnection) checksumUrl.openConnection();
+		BufferedInputStream in = new BufferedInputStream(conn.getInputStream());
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		int read;
+		while ((read = in.read()) != -1) {
+			out.write(read);
+		}
+		String html = new String(out.toByteArray());
+		in.close();
+		out.close();
+		
+		//scrape the checksum from the page
+		Matcher m = checksumPattern.matcher(html);
+		if (m.find()){
+			pageChecksum = m.group(1);
+		}
+		
+		return pageChecksum;
     }
 
     /*
@@ -265,7 +305,7 @@ public class EcAutoUpdate extends SwingWorker<Void, Void> {
 				e.printStackTrace();
 			}
     	} else {
-    		JOptionPane.showMessageDialog(null, messages.getString("update.failed.message"), messages.getString("update.failed.title"), JOptionPane.ERROR_MESSAGE);
+    		callback.checksumFailed();
     	}
 		
 		//quit the current program (the old version)
@@ -293,5 +333,34 @@ public class EcAutoUpdate extends SwingWorker<Void, Void> {
             } while(two_halfs++ < 1);
         } 
         return buf.toString();
+    }
+    
+    /**
+     * Allows the code calling this class to handle certain auto-updater events.
+     * @author mike.angstadt
+     *
+     */
+    public interface Callback
+    {
+    	/**
+    	 * Called when the checksum of the downloaded JAR file did not match its expected checksum.
+    	 */
+    	void checksumFailed();
+    	
+    	/**
+    	 * Called if there is a problem determining what the latest version is.
+    	 */
+    	void updateCheckFailed();
+    }
+    
+    protected static class FileInfo
+    {
+    	public InputStream inputStream;
+    	public long length;
+		public FileInfo(InputStream in, long length)
+		{
+			this.inputStream = in;
+			this.length = length;
+		}
     }
 }
