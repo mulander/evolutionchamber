@@ -25,11 +25,11 @@ public class EcActionWait extends EcAction implements Serializable
 		if (isPossible(s))
 			return true;
 		s.seconds += 1;
-		Collection<Runnable> futureActions = s.getFutureActions(s.seconds);
+		ArrayList<Runnable> futureActions = s.getFutureActions(s.seconds);
 		if (futureActions != null)
-			for (Runnable r : futureActions)
+			for (int i = 0; i < futureActions.size(); ++i)
 			{
-				r.run();
+				futureActions.get(i).run();
 				go = true;
 			}
 		s.accumulateMaterials();
@@ -39,7 +39,7 @@ public class EcActionWait extends EcAction implements Serializable
 	@Override
 	public boolean isInvalid(EcBuildOrder s)
 	{
-		if (s.nothingGoingToHappen(s.seconds))
+		if (s.nothingGoingToHappen())
 			return true;
 		return super.isInvalid(s);
 	}
