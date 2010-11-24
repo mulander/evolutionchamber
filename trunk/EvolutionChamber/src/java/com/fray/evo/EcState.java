@@ -720,8 +720,10 @@ public class EcState implements Serializable
 	{
 		if (waypoints == null)
 			waypoints = new ArrayList<EcState>();
-		for (EcState s : waypoints)
+		for( int i = 0; i < waypoints.size(); ++i )
 		{
+			EcState s = waypoints.get( i );
+			
 			if (candidate.seconds < s.targetSeconds)
 				continue;
 			if (s.isSatisfied(candidate))
