@@ -6,7 +6,6 @@ import java.util.List;
 
 import com.fray.evo.EcBuildOrder;
 import com.fray.evo.EcEvolver;
-import com.fray.evo.EcSettings;
 import com.fray.evo.EcState;
 
 public class EcActionMineMineral extends EcAction implements Serializable
