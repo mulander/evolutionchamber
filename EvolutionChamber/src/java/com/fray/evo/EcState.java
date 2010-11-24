@@ -4,8 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fray.evo.fitness.EcFitness;
-import static java.lang.Math.*;
 
 public class EcState implements Serializable
 {

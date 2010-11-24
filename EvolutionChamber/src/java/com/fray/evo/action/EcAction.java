@@ -2,7 +2,6 @@ package com.fray.evo.action;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -11,7 +10,6 @@ import java.util.Map;
 import com.fray.evo.EcBuildOrder;
 import com.fray.evo.EcEvolver;
 import com.fray.evo.EcRequirementTree;
-import com.fray.evo.EcSettings;
 import com.fray.evo.EcState;
 
 public abstract class EcAction implements Serializable
