@@ -98,7 +98,8 @@ public class EcState implements Serializable
 
 	public List<Integer>			hatcheryTimes		= new ArrayList<Integer>();
 
-	public List<EcState>	waypoints			= new ArrayList<EcState>();
+	public ArrayList<EcState>		waypoints			= new ArrayList<EcState>();
+	public EcState					mergedWaypoints		= null;
 
 	@Override
 	public Object clone() throws CloneNotSupportedException
@@ -120,6 +121,19 @@ public class EcState implements Serializable
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+
+		try
+		{
+			if( mergedWaypoints == null )
+				s.mergedWaypoints = null;
+			else
+				s.mergedWaypoints = (EcState)mergedWaypoints.clone();
+		}
+		catch (CloneNotSupportedException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		s.settings = settings;
 		s.minerals = minerals;
@@ -346,8 +360,9 @@ public class EcState implements Serializable
 	{
 		if (waypoints.size() > 0)
 		{
-			EcState state = getMergedState();
-			return state.isSatisfied(candidate);
+			if( mergedWaypoints == null )
+				mergedWaypoints = getMergedState();
+			return mergedWaypoints.isSatisfied(candidate);
 		}
 
 		if (candidate.drones < drones)
@@ -536,8 +551,9 @@ public class EcState implements Serializable
 	{
 		if (waypoints.size() > 0)
 		{
-			EcState state = getMergedState();
-			return state.getEstimatedActions();
+			if( mergedWaypoints == null )
+				mergedWaypoints = getMergedState();
+			return mergedWaypoints.getEstimatedActions();
 		}
 
 		int i = requiredBases + lairs + hives + spawningPools + evolutionChambers + roachWarrens + hydraliskDen
@@ -714,20 +730,35 @@ public class EcState implements Serializable
 			sb.append("\n" + name + ": " + count);
 	}
 
+	private int currWaypoint = 0;
 	public boolean waypointMissed(EcBuildOrder candidate)
 	{
-		if (waypoints == null)
-			waypoints = new ArrayList<EcState>();
-		for( int i = 0; i < waypoints.size(); ++i )
-		{
-			EcState s = waypoints.get( i );
-			
-			if (candidate.seconds < s.targetSeconds)
-				continue;
-			if (s.isSatisfied(candidate))
-				continue;
-			return true;
+		if (waypoints == null || currWaypoint >= waypoints.size())
+			return false;
+		
+		EcState s = waypoints.get(currWaypoint);
+		if (candidate.seconds != s.targetSeconds)
+			return false;
+
+		if (s.isSatisfied(candidate)) {
+			currWaypoint++;
+			return false;
 		}
-		return false;
+			
+		return true;
+	}
+	
+	public int getCurrWaypointIndex(EcBuildOrder candidate) {
+		if(currWaypoint == 0)
+			return -1;
+
+		EcState r = waypoints.get(currWaypoint - 1);
+		if (r.targetSeconds == candidate.seconds)
+			return currWaypoint - 1;
+		return -1;
+	}
+	
+	public int getWaypointActions(int index) {
+		return waypoints.get(index).getEstimatedActions();
 	}
 }
