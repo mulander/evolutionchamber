@@ -78,6 +78,7 @@ public class EcEvolver extends FitnessFunction
 {
 	EcState								source;
 	private EcState						destination;
+	private EcState						mergedDestination;
 	public boolean						debug		= false;
 	public static long evaluations = 0;
 	public static long cachehits = 0;
@@ -151,6 +152,7 @@ public class EcEvolver extends FitnessFunction
 	{
 		this.source = source;
 		this.destination = destination;
+		this.mergedDestination = destination.getMergedState();
 	}
 
 	protected String getAlleleAsString(IChromosome c)
@@ -391,13 +393,12 @@ public class EcEvolver extends FitnessFunction
 			{
 				if (s.seconds >= s.targetSeconds || destination.waypointMissed(s))
 				{
-					
 					if (s.settings.overDrone && s.drones < s.getOverDrones(s))
 					{
 						if (debug)
 						{
 							log.print("-------Goal-------");
-							log.println(destination.getMergedState().toUnitsOnlyString());
+							log.println(mergedDestination.toUnitsOnlyString());
 							log.println("Failed to have the required " + s.getOverDrones(s) + " drones.");
 							log.println(s.toCompleteString());
 						}
@@ -407,7 +408,7 @@ public class EcEvolver extends FitnessFunction
 						if (debug)
 						{
 							log.print("-------Goal-------");
-							log.println(destination.getMergedState().toUnitsOnlyString());
+							log.println(mergedDestination.toUnitsOnlyString());
 							log.println("Failed to meet waypoint. " + a);
 							log.println(s.toCompleteString());
 						}
@@ -416,17 +417,13 @@ public class EcEvolver extends FitnessFunction
 				}
 				if (debug)
 				{
-					int waypointIndex = 0;
-					for (EcState se : destination.waypoints)
-					{
-						if (se.targetSeconds == s.seconds && se.getEstimatedActions() > 0)
-						{
+					int waypointIndex = destination.getCurrWaypointIndex(s);
+					if (waypointIndex != -1)
+						if (destination.getWaypointActions(waypointIndex) > 0) {
 							log.println("---Waypoint " + waypointIndex + "---");
 							log.println(s.toCompleteString());
 							log.println("----------------");
 						}
-						waypointIndex++;
-					}
 				}
 				if (destination.isSatisfied(s))
 				{ 
@@ -436,7 +433,7 @@ public class EcEvolver extends FitnessFunction
 						log.println("Number of actions in build order: " + (i - s.invalidActions));
 
 						log.print("-------Goal-------");
-						log.println(destination.getMergedState().toUnitsOnlyString());
+						log.println(mergedDestination.toUnitsOnlyString());
 						log.println("---Final Output---");
 						log.println(s.toCompleteString());
 						log.println("------------------");
@@ -477,9 +474,9 @@ public class EcEvolver extends FitnessFunction
 	{
 		log.println("@" + s.timestamp() + "\tScout: \t" + string.trim());
 	}
+
 	public EcState getDestination()
 	{
 		return destination;
 	}
-
 }
