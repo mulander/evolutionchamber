@@ -1,61 +1,52 @@
 package com.fray.evo.util;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Comparator;
+import java.util.PriorityQueue;
 
 public class ActionList {
-	private static final int numIntegers = 10000;
-	private static Integer[] integers = new Integer[numIntegers];
-
 	private int numLeft;
-	private HashMap<Integer, ArrayList<Runnable>> map;
+	private PriorityQueue<TWrapper> pq = null;
 	
 	public ActionList()
 	{
 		numLeft = 0;
-		map = new HashMap<Integer, ArrayList<Runnable>>();
+		pq = new PriorityQueue<TWrapper>( 11, new Comparitor() );
 	}
 	
 	public void put( int i, Runnable r )
 	{
-		Integer inte = getInteger( i );
-		
-		ArrayList<Runnable> list = map.get( i );
-		if( list == null )
-		{
-			list = new ArrayList<Runnable>();
-			list.add( r );
-			map.put( inte, list );
-		}
-		else
-		{
-			list.add( r );
-		}
+		pq.add( new TWrapper( i, r ) );
 		numLeft++;
 	}
 	
-	public ArrayList<Runnable> get( int i )
+	public Runnable get( int i )
 	{
-		Integer inte = getInteger( i );
-
-		ArrayList<Runnable> result = map.get( inte );
-		if( result != null )
-			numLeft -= result.size();
-		return result;
+		if( pq.peek() != null && pq.peek().time == i ) {
+			numLeft--;
+			return pq.poll().object;
+		}
+		return null;
 	}
 
 	public boolean hasFutureActions()
 	{
 		return numLeft > 0;
 	}
-	
-	private Integer getInteger( int i )
-	{
-		if( i > numIntegers )
-			return new Integer( i );
+
+	private class TWrapper {
+		public int time;
+		public Runnable object;
 		
-		if( integers[i] == null )
-			integers[i] = new Integer( i );
-		return integers[i];
+		public TWrapper( int i, Runnable r ) {
+			this.time = i;
+			this.object = r;
+		}
+	}
+
+	public class Comparitor implements Comparator<TWrapper> {
+		@Override
+		public int compare(TWrapper arg0, TWrapper arg1) {
+			return arg0.time - arg1.time;
+		}
 	}
 }

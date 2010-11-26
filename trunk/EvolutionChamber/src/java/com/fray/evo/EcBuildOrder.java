@@ -93,11 +93,9 @@ public class EcBuildOrder extends EcState implements Serializable
 		actionLength++;
 	}
 
-	public ArrayList<Runnable> getFutureActions(int time)
+	public Runnable getFutureAction(int time)
 	{
-		ArrayList<Runnable> result = futureAction.get(time);
-		if (result == null)
-			return null;
+		Runnable result = futureAction.get(time);
 		return result;
 	}
 
