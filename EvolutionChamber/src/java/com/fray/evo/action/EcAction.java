@@ -48,10 +48,9 @@ public abstract class EcAction implements Serializable
 		if (isPossible(s))
 			return true;
 		s.seconds += 1;
-		ArrayList<Runnable> futureActions = s.getFutureActions(s.seconds);
-		if (futureActions != null)
-			for (int i = 0; i < futureActions.size(); ++i)
-				futureActions.get(i).run();
+		Runnable futureAction;
+		while( (futureAction = s.getFutureAction(s.seconds)) != null )
+			futureAction.run();
 		s.accumulateMaterials();
 		return false;
 	}
