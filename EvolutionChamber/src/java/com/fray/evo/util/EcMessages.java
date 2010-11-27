@@ -1,6 +1,7 @@
 package com.fray.evo.util;
 
 import java.text.MessageFormat;
+import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.regex.Matcher;
@@ -28,7 +29,7 @@ public class EcMessages {
 	 * class name
 	 */
 	public EcMessages(String bundleName) {
-		messages = ResourceBundle.getBundle(bundleName);
+		messages = Utf8ResourceBundle.getBundle(bundleName,Locale.KOREA);
 	}
 
 	/**
@@ -41,15 +42,15 @@ public class EcMessages {
 		String message = messages.getString(key);
 
 		//handle references to other properties
-		Matcher m = propRefRegex.matcher(message);
-		while (m.find()) {
-			try {
-				String refMessage = getString(m.group(1).trim());
-				message = message.replace(m.group(0), refMessage);
-			} catch (MissingResourceException e) {
-				//ignore references to non-existant properties and to argument references ("{0}")
-			}
-		}
+//		Matcher m = propRefRegex.matcher(message);
+//		while (m.find()) {
+//			try {
+//				String refMessage = getString(m.group(1).trim());
+//				message = message.replace(m.group(0), refMessage);
+//			} catch (MissingResourceException e) {
+//				//ignore references to non-existant properties and to argument references ("{0}")
+//			}
+//		}
 
 		return message;
 	}

@@ -1,5 +1,5 @@
 package com.fray.evo;
-
+import static com.fray.evo.ui.swingx.EcSwingXMain.messages;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -235,7 +235,7 @@ public class EcEvolver extends FitnessFunction
 			{
 				if (s.seconds >= s.targetSeconds || destination.waypointMissed(s))
 				{
-					return "No finished build yet. A waypoint was not reached.";
+					return messages.getString("NoFinishedBuildYet");
 				}
 				
 				if (destination.isSatisfied(s))
@@ -252,7 +252,7 @@ public class EcEvolver extends FitnessFunction
 			a.execute(s, this);
 		}
 
-		return "No finished build yet. Ran out of things to do.";
+		return messages.getString("RanOutOfThingsToDo");
 	}
 
 	public String getYabotBuildOrder(IChromosome arg0)
@@ -290,7 +290,7 @@ public class EcEvolver extends FitnessFunction
 			{					
 				if (s.seconds >= s.targetSeconds || destination.waypointMissed(s))
 				{
-					return "No finished build yet. A waypoint was not reached.\n"+EcUtil.toString(warnings);
+					return messages.getString("NoFinishedBuildYet")+"\n"+EcUtil.toString(warnings);
 				}
 				
 				if (destination.isSatisfied(s))
@@ -348,7 +348,7 @@ public class EcEvolver extends FitnessFunction
 			a.execute(s, this);
 		}
 
-		return "No finished build yet. Ran out of things to do.\n"+EcUtil.toString(warnings);
+		return messages.getString("RanOutOfThingsToDo")+"\n"+EcUtil.toString(warnings);
 	}
 	
 	public static EcBuildOrder populateBuildOrder(EcBuildOrder source, IChromosome arg0)
@@ -397,9 +397,9 @@ public class EcEvolver extends FitnessFunction
 					{
 						if (debug)
 						{
-							log.print("-------Goal-------");
+							log.print("-------"+messages.getString("Goal")+"-------");
 							log.println(mergedDestination.toUnitsOnlyString());
-							log.println("Failed to have the required " + s.getOverDrones(s) + " drones.");
+							log.println(messages.getString("FailedToHaveRequired")+" " + s.getOverDrones(s) + " "+messages.getString("waypoint.drones"));
 							log.println(s.toCompleteString());
 						}
 					}
@@ -407,9 +407,9 @@ public class EcEvolver extends FitnessFunction
 					{
 						if (debug)
 						{
-							log.print("-------Goal-------");
+							log.print("-------"+messages.getString("Goal")+"-------");
 							log.println(mergedDestination.toUnitsOnlyString());
-							log.println("Failed to meet waypoint. " + a);
+							log.println(messages.getString("FailedToMeetWaypoint") + a);
 							log.println(s.toCompleteString());
 						}
 					}
@@ -420,7 +420,7 @@ public class EcEvolver extends FitnessFunction
 					int waypointIndex = destination.getCurrWaypointIndex(s);
 					if (waypointIndex != -1)
 						if (destination.getWaypointActions(waypointIndex) > 0) {
-							log.println("---Waypoint " + waypointIndex + "---");
+							log.println("---"+messages.getString("Waypoint")+" " + waypointIndex + "---");
 							log.println(s.toCompleteString());
 							log.println("----------------");
 						}
@@ -432,9 +432,9 @@ public class EcEvolver extends FitnessFunction
 						log.println("Satisfied.");
 						log.println("Number of actions in build order: " + (i - s.invalidActions));
 
-						log.print("-------Goal-------");
+						log.print("-------"+messages.getString("Goal")+"-------");
 						log.println(mergedDestination.toUnitsOnlyString());
-						log.println("---Final Output---");
+						log.println("---"+messages.getString("FinalOutput")+"---");
 						log.println(s.toCompleteString());
 						log.println("------------------");
 					}
@@ -449,7 +449,7 @@ public class EcEvolver extends FitnessFunction
 		}
 		if (debug)
 		{
-			log.println("Ran out of things to do.");
+			log.println(messages.getString("OutOfActions"));
 			log.println(s.toCompleteString());
 		}
 		return s;
@@ -457,22 +457,22 @@ public class EcEvolver extends FitnessFunction
 
 	public void obtained(EcBuildOrder s, String string)
 	{
-		log.println("@" + s.timestamp() + "\tSpawned:\t" + string.trim());
+		log.println("@" + s.timestamp() + "\t"+messages.getString("Spawned")+":\t" + string.trim());
 	}
 
 	public void evolved(EcBuildOrder s, String string)
 	{
-		log.println("@" + s.timestamp() + "\tEvolved:\t" + string.trim());
+		log.println("@" + s.timestamp() + "\t"+messages.getString("Evolved")+":\t" + string.trim());
 	}
 
 	public void mining(EcBuildOrder s, String string)
 	{
-		log.println("@" + s.timestamp() + "\tMining: \t" + string.trim());
+		log.println("@" + s.timestamp() + "\t"+messages.getString("Mining")+": \t" + string.trim());
 	}
 
 	public void scout(EcBuildOrder s, String string)
 	{
-		log.println("@" + s.timestamp() + "\tScout: \t" + string.trim());
+		log.println("@" + s.timestamp() + "\t"+messages.getString("Scout")+": \t" + string.trim());
 	}
 
 	public EcState getDestination()

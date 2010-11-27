@@ -1,5 +1,5 @@
 package com.fray.evo.action;
-
+import static com.fray.evo.ui.swingx.EcSwingXMain.messages;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +24,7 @@ public class EcActionExtractorTrick extends EcAction implements Serializable
 			public void run()
 			{
 				if (e.debug)
-					e.obtained(s," Extractor Trick Finished, Drone Restored");
+					e.obtained(s," "+messages.getString("finished.extractortrick"));
 				s.minerals += 19;
 				s.drones += 1;
 				s.dronesOnMinerals += 1;

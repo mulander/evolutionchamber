@@ -1,5 +1,5 @@
 package com.fray.evo;
-
+import static com.fray.evo.ui.swingx.EcSwingXMain.messages;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -642,8 +642,8 @@ public class EcState implements Serializable
 	{
 		StringBuilder sb = new StringBuilder();
 		sb.append("At time: " + timestamp());
-		sb.append("\nMinerals: " + (int) minerals + "\tGas:      " + (int) gas + "\tSupply:   " + ((int) supplyUsed)
-				+ "/" + supply() + "\tLarva: " + larva);
+		sb.append("\n"+messages.getString("Minerals")+": " + (int) minerals + "\t"+messages.getString("Gas")+":      " + (int) gas + "\t"+messages.getString("Supply")+":   " + ((int) supplyUsed)
+				+ "/" + supply() + "\t"+messages.getString("Larva")+": " + larva);
 		appendBuildStuff(sb);
 		return sb.toString();
 	}
@@ -657,37 +657,37 @@ public class EcState implements Serializable
 
 	private void appendBuildStuff(StringBuilder sb)
 	{
-		append(sb, "Drones", drones);
-		append(sb, "Overlords", overlords);
-		append(sb, "Overseers", overseers);
-		append(sb, "Queens", queens);
-		append(sb, "Zerglings", zerglings);
-		append(sb, "Banelings", banelings);
-		append(sb, "Roaches", roaches);
-		append(sb, "Hydralisks", hydralisks);
-		append(sb, "Infestors", infestors);
-		append(sb, "Mutalisks", mutalisks);
-		append(sb, "Corruptors", corruptors);
-		append(sb, "Ultralisks", ultralisks);
-		append(sb, "Brood Lords", broodlords);
+		append(sb, "Drone", drones);
+		append(sb, "Overlord", overlords);
+		append(sb, "Overseer", overseers);
+		append(sb, "Queen", queens);
+		append(sb, "Zergling", zerglings);
+		append(sb, "Baneling", banelings);
+		append(sb, "Roach", roaches);
+		append(sb, "Hydralisk", hydralisks);
+		append(sb, "Infestor", infestors);
+		append(sb, "Mutalisk", mutalisks);
+		append(sb, "Corruptor", corruptors);
+		append(sb, "Ultralisk", ultralisks);
+		append(sb, "Brood Lord", broodlords);
 
 		append(sb, "Bases", requiredBases);
-		append(sb, "Lairs", lairs);
-		append(sb, "Hives", hives);
-		append(sb, "Gas Extractors", gasExtractors);
-		append(sb, "Spawning Pools", spawningPools);
+		append(sb, "Lair", lairs);
+		append(sb, "Hive", hives);
+		append(sb, "Gas Extractor", gasExtractors);
+		append(sb, "Spawning Pool", spawningPools);
 		append(sb, "Baneling Nest", banelingNest);
-		append(sb, "Roach Warrens", roachWarrens);
+		append(sb, "Roach Warren", roachWarrens);
 		append(sb, "Hydralisk Den", hydraliskDen);
 		append(sb, "Infestation Pit", infestationPit);
 		append(sb, "Spire", spire);
 		append(sb, "Ultralisk Cavern", ultraliskCavern);
 		append(sb, "Greater Spire", greaterSpire);
-		append(sb, "Evolution Chambers", evolutionChambers);
-		append(sb, "Spine Crawlers", spineCrawlers);
-		append(sb, "Spore Crawlers", sporeCrawlers);
-		append(sb, "Nydus Networks", nydusNetwork);
-		append(sb, "Nydus Worms", nydusWorm);
+		append(sb, "Evolution Chamber", evolutionChambers);
+		append(sb, "Spine Crawler", spineCrawlers);
+		append(sb, "Spore Crawler", sporeCrawlers);
+		append(sb, "Nydus Network", nydusNetwork);
+		append(sb, "Nydus Worm", nydusWorm);
 
 		append(sb, "Melee +1", melee1);
 		append(sb, "Melee +2", melee2);
@@ -695,12 +695,12 @@ public class EcState implements Serializable
 		append(sb, "Missile +1", missile1);
 		append(sb, "Missile +2", missile2);
 		append(sb, "Missile +3", missile3);
-		append(sb, "Armor +1", armor1);
-		append(sb, "Armor +2", armor2);
-		append(sb, "Armor +3", armor3);
-		append(sb, "Flyer Attack +1", flyerAttack1);
-		append(sb, "Flyer Attack +2", flyerAttack2);
-		append(sb, "Flyer Attack +3", flyerAttack3);
+		append(sb, "Carapace +1", armor1);
+		append(sb, "Carapace +2", armor2);
+		append(sb, "Carapace +3", armor3);
+		append(sb, "Flyer Attacks +1", flyerAttack1);
+		append(sb, "Flyer Attacks +2", flyerAttack2);
+		append(sb, "Flyer Attacks +3", flyerAttack3);
 		append(sb, "Flyer Armor +1", flyerArmor1);
 		append(sb, "Flyer Armor +2", flyerArmor2);
 		append(sb, "Flyer Armor +3", flyerArmor3);
@@ -721,13 +721,13 @@ public class EcState implements Serializable
 	private void append(StringBuilder sb, String name, boolean doit)
 	{
 		if (doit)
-			sb.append("\n" + name);
+			sb.append("\n" + messages.getString(name.replace(' ','.')));
 	}
 
 	private void append(StringBuilder sb, String name, int count)
 	{
 		if (count > 0)
-			sb.append("\n" + name + ": " + count);
+			sb.append("\n" + messages.getString(name.replace(' ','.')) + ": " + count);
 	}
 
 	private int currWaypoint = 0;

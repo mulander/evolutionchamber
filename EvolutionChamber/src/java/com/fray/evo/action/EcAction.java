@@ -1,5 +1,7 @@
 package com.fray.evo.action;
 
+import static com.fray.evo.ui.swingx.EcSwingXMain.messages;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,7 +23,7 @@ public abstract class EcAction implements Serializable
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName().replace("EcAction", "");
+		return messages.getString(getClass().getSimpleName().replace("EcAction", ""));
 	}
 	
 	public String toBuildOrderString(EcState state)
