@@ -1,5 +1,7 @@
 package com.fray.evo.action.build;
 
+import static com.fray.evo.ui.swingx.EcSwingXMain.messages;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +38,7 @@ public class EcActionBuildQueen extends EcActionBuildUnit implements Serializabl
 				public void run()
 				{
 					if (e.debug && s.larva < s.bases() * 19)
-						e.obtained(s, " Larva+" + (Math.min(s.bases()*19,s.larva+4) - s.larva));
+						e.obtained(s, " "+messages.getString("Larva") + (Math.min(s.bases()*19,s.larva+4) - s.larva));
 					s.larva = Math.min(s.bases()*19,s.larva+4);
 					s.addFutureAction(45, this);
 				}

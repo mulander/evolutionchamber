@@ -29,7 +29,7 @@ public class EcMessages {
 	 * class name
 	 */
 	public EcMessages(String bundleName) {
-		messages = Utf8ResourceBundle.getBundle(bundleName);
+		messages = Utf8ResourceBundle.getBundle(bundleName,Locale.KOREA);
 	}
 
 	/**
