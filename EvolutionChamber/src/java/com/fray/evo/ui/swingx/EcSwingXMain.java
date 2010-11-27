@@ -25,7 +25,7 @@ import com.fray.evo.util.EcMessages;
  */
 public class EcSwingXMain
 {
-	public static final EcMessages	messages	= new EcMessages("com/fray/evo/ui/swingx/messages_ko");
+	public static final EcMessages	messages	= new EcMessages("com/fray/evo/ui/swingx/messages");
 	public static final String		EC_VERSION	= "0022";
 	public static final String iconLocation = "/com/fray/evo/ui/swingx/evolution_chamber.png";
 
