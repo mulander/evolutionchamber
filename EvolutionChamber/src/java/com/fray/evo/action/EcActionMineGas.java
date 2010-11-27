@@ -1,5 +1,7 @@
 package com.fray.evo.action;
 
+import static com.fray.evo.ui.swingx.EcSwingXMain.messages;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,14 +33,14 @@ public class EcActionMineGas extends EcAction implements Serializable
 				if (s.settings.pullThreeWorkersOnly) 
 				{
 					if (e.debug)
-						e.mining(s," +3 on gas");
+						e.mining(s," "+messages.getString("3ongas"));
 					s.dronesGoingOnGas -= 3;
 					s.dronesOnGas += 3;
 				}
 				else
 				{
 					if (e.debug)
-						e.mining(s," +1 on gas");
+						e.mining(s," "+messages.getString("1ongas"));
 					s.dronesGoingOnGas--;
 					s.dronesOnGas++;
 				}

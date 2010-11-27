@@ -429,8 +429,8 @@ public class EcEvolver extends FitnessFunction
 				{ 
 					if (debug)
 					{
-						log.println("Satisfied.");
-						log.println("Number of actions in build order: " + (i - s.invalidActions));
+						log.println(messages.getString("Satisfied"));
+						log.println(messages.getString("NumberOfActions")+" " + (i - s.invalidActions));
 
 						log.print("-------"+messages.getString("Goal")+"-------");
 						log.println(mergedDestination.toUnitsOnlyString());

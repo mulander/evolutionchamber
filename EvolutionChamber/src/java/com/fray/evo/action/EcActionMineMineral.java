@@ -1,5 +1,7 @@
 package com.fray.evo.action;
 
+import static com.fray.evo.ui.swingx.EcSwingXMain.messages;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,14 +33,14 @@ public class EcActionMineMineral extends EcAction implements Serializable
 				if (s.settings.pullThreeWorkersOnly) 
 				{
 					if (e.debug)
-						e.mining(s," +3 on minerals");
+						e.mining(s," "+messages.getString("3onminerals"));
 					s.dronesGoingOnMinerals -= 3;
 					s.dronesOnMinerals += 3;
 				}
 				else
 				{
 					if (e.debug)
-						e.mining(s," +1 on minerals");
+						e.mining(s," "+messages.getString("1onminerals"));
 					s.dronesGoingOnMinerals--;
 					s.dronesOnMinerals++;
 				}

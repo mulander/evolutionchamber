@@ -641,7 +641,7 @@ public class EcState implements Serializable
 	public String toCompleteString()
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append("At time: " + timestamp());
+		sb.append(messages.getString("AtTime")+": " + timestamp());
 		sb.append("\n"+messages.getString("Minerals")+": " + (int) minerals + "\t"+messages.getString("Gas")+":      " + (int) gas + "\t"+messages.getString("Supply")+":   " + ((int) supplyUsed)
 				+ "/" + supply() + "\t"+messages.getString("Larva")+": " + larva);
 		appendBuildStuff(sb);

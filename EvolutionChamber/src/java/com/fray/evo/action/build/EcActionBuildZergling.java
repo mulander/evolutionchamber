@@ -1,5 +1,6 @@
 package com.fray.evo.action.build;
 
+import static com.fray.evo.ui.swingx.EcSwingXMain.messages;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +28,7 @@ public class EcActionBuildZergling extends EcActionBuildUnit implements Serializ
 	protected void obtainOne(EcBuildOrder s, EcEvolver e)
 	{
 		if (e.debug)
-			e.obtained(s, " " + name + "+2");
+			e.obtained(s, " " + messages.getString(name) + "+2");
 	}
 
 	@Override
