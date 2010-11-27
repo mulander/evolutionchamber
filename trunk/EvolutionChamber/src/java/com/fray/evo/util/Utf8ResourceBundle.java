@@ -54,8 +54,8 @@ private static class Utf8PropertyResourceBundle extends ResourceBundle {
     catch (NullPointerException n)
     {
     	System.out.println("Externalize " + key);
-    	throw n;
-//    	return key;
+//    	throw n;
+    	return key;
     }
   }
 
