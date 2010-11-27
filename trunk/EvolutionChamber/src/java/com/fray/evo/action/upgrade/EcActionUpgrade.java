@@ -53,12 +53,6 @@ public abstract class EcActionUpgrade extends EcAction implements Serializable
 		this.name = name;
 	}
 
-	@Override
-	public String toString()
-	{
-		return name;
-	}
-
 	public abstract void afterTime(EcBuildOrder s, EcEvolver e);
 
 }

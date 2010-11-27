@@ -1,5 +1,7 @@
 package com.fray.evo;
 
+import static com.fray.evo.ui.swingx.EcSwingXMain.messages;
+
 import java.io.Serializable;
 import java.util.*;
 
@@ -70,7 +72,7 @@ public class EcBuildOrder extends EcState implements Serializable
 	
 	public String toShortString()
 	{
-		return ("@" + timestamp() + "\tM:" + (int) minerals + "\tG:" + (int) gas + "\tL:" + larva + "\tS:"
+		return (messages.getString("short.time") + timestamp() + "\t"+messages.getString("short.minerals")+":" + (int) minerals + "\t"+messages.getString("short.gas")+":" + (int) gas + "\t"+messages.getString("short.larva")+":" + larva + "\t"+messages.getString("short.supply")+":"
 				+ ((int) supplyUsed) + "/" + supply());
 	}
 
@@ -117,7 +119,7 @@ public class EcBuildOrder extends EcState implements Serializable
 				public void run()
 				{
 					if (e.debug)
-						e.obtained(t, " Larva+1");
+						e.obtained(t, " "+messages.getString("Larva")+"+1");
 					larva = Math.max(Math.min(larva + bases(), bases() * 3), larva);
 					if (larva < 3 * bases())
 						addFutureAction(15, this);
