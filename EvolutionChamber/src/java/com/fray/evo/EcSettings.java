@@ -12,9 +12,11 @@ public class EcSettings implements Serializable
 	public boolean pullWorkersFromGas = true;
 	public boolean pullThreeWorkersOnly = false;
 	public EcFitnessType fitnessType = EcFitnessType.STANDARD;
+	public int maximumExtractorTrickSupply = 200;
 	public int minimumPoolSupply = 2;
 	public int minimumExtractorSupply = 2;
 	public int minimumHatcherySupply = 2;
+
 
 	
 	private transient EcFitness ff;

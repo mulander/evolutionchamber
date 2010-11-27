@@ -54,7 +54,7 @@ public class EvolutionChamber
 	public Double				bestScore				= new Double(0);
 	public Integer				stagnationLimit			= new Integer(0);
 	public Double				waterMark				= new Double(0);
-	int							STAGNATION_LIMIT_MIN	= 50;
+	int							STAGNATION_LIMIT_MIN	= 200;
 	
 	public List<EcBuildOrder>	history					= new ArrayList<EcBuildOrder>();
 	private EcState				destination				= EcState.defaultDestination();
@@ -219,21 +219,21 @@ public class EvolutionChamber
 					}
 				}
 
-				stagnationLimit = (int) Math.ceil(highestevosSinceDiscovery * (.5));
+				stagnationLimit = Math.max(STAGNATION_LIMIT_MIN, (int) Math.ceil(highestevosSinceDiscovery * (.5)));
 
 				if (fitnessValue < bestScore)
 				{
-					if (evolutionsSinceDiscovery[threadIndex] > Math.max(stagnationLimit, STAGNATION_LIMIT_MIN)
+					if (evolutionsSinceDiscovery[threadIndex] > stagnationLimit
 							&& fitnessValue < waterMark)
 					{
 						suicide(source, destination, threadIndex, thread);
 					}
-					else if (evolutionsSinceDiscovery[threadIndex] > Math.max(stagnationLimit, STAGNATION_LIMIT_MIN) * 3)
+					else if (evolutionsSinceDiscovery[threadIndex] > stagnationLimit * 3)
 					{
 						suicide(source, destination, threadIndex, thread);
 					}
 				}
-				else if (evolutionsSinceDiscovery[threadIndex] > Math.max(stagnationLimit, STAGNATION_LIMIT_MIN))
+				else if (evolutionsSinceDiscovery[threadIndex] > stagnationLimit)
 				{
 					if (newbestscore)
 					{
@@ -252,7 +252,7 @@ public class EvolutionChamber
 						}
 					}
 
-					if (totalevoSinceDiscoveryOnBest > Math.max(stagnationLimit, STAGNATION_LIMIT_MIN) * 3
+					if (totalevoSinceDiscoveryOnBest > stagnationLimit * 3
 							* numBestThreads)
 					{
 						suicide(source, destination, threadIndex, thread);

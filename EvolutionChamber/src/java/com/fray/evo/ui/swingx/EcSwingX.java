@@ -450,6 +450,21 @@ public class EcSwingX extends JXPanel implements EcReportable
 			}
 		}).setSelected(destination.get(destination.size()-1).settings.pullThreeWorkersOnly);
 		gridy++;
+		addInput(settings, messages.getString("settings.maxExtractorTrickSupply"), new CustomActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				destination.get(destination.size()-1).settings.maximumExtractorTrickSupply = getDigit(e);
+			}
+			@Override
+			void reverse(Object o)
+			{
+				JTextField c = (JTextField) o;
+				c.setText(Integer.toString(destination.get(destination.size()-1).settings.maximumExtractorTrickSupply));
+			}
+		}).setText("200");
+		gridy++;
 		addInput(settings, messages.getString("settings.minPoolSupply"), new CustomActionListener()
 		{
 			@Override
