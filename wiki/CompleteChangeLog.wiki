@@ -14,7 +14,7 @@ This page will detail the changes made at each version.
  * Auto-updater download progress bar now displays properly.
  * Fixed a Mac bug that displayed the "Preferences" menu option when it shouldn't have been shown at all.
  * Korean language support.
- * Increased games played per second by another 45%.
+ * Increased games played per second by another 83%!
 
 == v0022 == 
 
