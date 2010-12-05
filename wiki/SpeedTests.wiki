@@ -31,4 +31,4 @@ The test program was run multiple times for each version.
 || Run 5, Test 2 || 472.5 || 3293.65 ||
 || Run 5, Test 3 || 2656.05 || 4364.6 ||
 || *Total* || _28933.2_ || _52948.95_ ||
-|| *Average* || _1928.88_ || _3529.93_ || ~45% increase ||
+|| *Average* || _1928.88_ || _3529.93_ || ~83% increase ||
