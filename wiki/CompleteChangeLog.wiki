@@ -14,9 +14,9 @@ This page will detail the changes made at each version.
  * Auto-updater download progress bar now displays properly.
  * Fixed a Mac bug that displayed the "Preferences" menu option when it shouldn't have been shown at all.
  * Window size and selected language preferences are now saved in the user's profile.
- * Added Korean and german language support.
+ * Added Korean and German language support.
  * Added an option to supress Extractors for gas-free builds.
- * Increased games played per second by another 83%!
+ * Increased games played per second by another 110%!
 
 == v0022 == 
 
