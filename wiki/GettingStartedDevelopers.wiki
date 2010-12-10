@@ -102,3 +102,13 @@ In order to download the source code, you must install a plugin that allows Ecli
 24. You should see the EvolutionChamber project. Open the folder, then open 'src/java'.
 
 25. Open the 'com.fray.evo.ui.swingx' package, click on 'EcSwingXMain.java' and then go to Run>Run (or the green arrow at the top).
+
+= Building the Application =
+
+Run the "create_run_jar" task in the "build.xml" Ant file.  This will generate the JAR used to run the application.  You must run this Ant file from Eclipse and it must run within the same JRE that Eclipse is running in:
+
+ # Right click on "build.xml" and select "Run As > Ant Build...".
+ # In the "JRE" tab, select "Run in the same JRE as the workspace".
+ # Click "Run".
+
+It will create a file called "evolutionchamber.jar" inside the "output" folder.
