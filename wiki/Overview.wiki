@@ -1,4 +1,5 @@
 #summary An overview of EvolutionChamber
+#labels Featured
 
 !EvolutionChamber is an application that generates *Starcraft 2 build orders*.  You tell it how many units, buildings, or upgrades you want by a certain time, and it works to find the best possible way to achieve this.  The less time and the less resources a build requires, the better.
 
