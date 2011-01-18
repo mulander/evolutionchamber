@@ -16,6 +16,7 @@ This page will detail the changes made at each version.
  * Fixed a bug that made it impossible to build Overlords while in negative supply (from using the Extractor trick).
  * Fixed a bug that caused the "total games played" and "games played per second" statistics to be calculated incorrectly (it did not take into account the games played by dead threads).
  * Fixed a bug that caused Zerglings to be treated as consuming 1 supply (instead of 0.5) when being morphed into Banelings.  This caused the supply to incorrectly lower by 0.5 every time a Baneling was built.
+ * Added Spanish language support (submitted by Jota).
 
 == v0023 ==
 
