@@ -8,7 +8,7 @@ This page will detail the changes made at each version.
 
 = Change Logs by Release =
 
-== v0024 (in development) ==
+== v0024 ==
 
  * Changed the way the Scout Timing field is displayed when loaded from History ("mm:ss" instead of total seconds).
  * Auto-updater now works when behind a proxy.
