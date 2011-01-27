@@ -8,7 +8,7 @@ This page will detail the changes made at each version.
 
 = Change Logs by Release =
 
-== v0025 ==
+== v0025/v0026 ==
 
  * Fixed some french.
 
