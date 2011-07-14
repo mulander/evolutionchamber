@@ -11,7 +11,8 @@ This page will detail the changes made at each version.
 == v0027 ==
  In development
  * Fixed issue #207 - the auto-updater was broken due to the changes in the format Google code uses for internal links.
- * Fixed issue #208 - if a newer version of EC is present in the current directory the file might get locked which might have resulted in it being prevented from deletion by other applications until the currently running EC is closed. 
+ * Fixed issue #208 - if a newer version of EC is present in the current directory the file might get locked which might have resulted in it being prevented from deletion by other applications until the currently running EC is closed.
+ * Fixed issue #209 - loaded properties files were not properly released after being loaded. This might have resulted in the file being locked from access of other applications until EC is closed. 
 
 == v0025/v0026 ==
 
